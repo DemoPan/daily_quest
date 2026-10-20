@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Printer, X, Download, Share2, CheckSquare, Award } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Printer, X, Award, FileText } from 'lucide-react';
 import { sounds } from '../../utils/sound';
 
 export default function PrintModal({
@@ -11,6 +11,23 @@ export default function PrintModal({
   if (!isOpen) return null;
 
   const [docType, setDocType] = useState(initialDocType);
+
+  // Sync initialDocType when opened
+  useEffect(() => {
+    setDocType(initialDocType);
+  }, [initialDocType]);
+
+  // Support ESC key to close modal
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        sounds.playClick();
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
 
   const handlePrint = () => {
     sounds.playStamp();
@@ -25,60 +42,80 @@ export default function PrintModal({
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
-      <div className="bg-white rounded-3xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-6 my-8">
-        {/* Top Controls (Hidden during actual print) */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-200 gap-4 no-print">
+    /* Modal Backdrop - uses items-start to ensure top is never cropped */
+    <div 
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          sounds.playClick();
+          onClose();
+        }
+      }}
+      className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm p-3 sm:p-6 flex justify-center items-start"
+    >
+      <div className="bg-white rounded-3xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-6 my-4 sm:my-8 animate-in fade-in slide-in-from-top-4 duration-200">
+        
+        {/* Sticky Top Control Toolbar - Always Visible Even When Scrolled */}
+        <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-md pt-4 pb-4 -mt-6 -mx-6 px-6 sm:-mt-8 sm:-mx-8 sm:px-8 border-b border-slate-200 shadow-sm rounded-t-3xl flex flex-col md:flex-row md:items-center justify-between gap-4 no-print">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-primary text-white flex items-center justify-center font-bold text-xl shadow-neo-primary">
+            <div className="w-10 h-10 rounded-2xl bg-primary text-white flex items-center justify-center font-bold text-xl shadow-neo-primary shrink-0">
               🖨️
             </div>
             <div>
-              <h3 className="font-headline font-bold text-lg text-onSurface">
-                A4 纸质单据打印与预览
+              <h3 className="font-headline font-bold text-base sm:text-lg text-onSurface flex items-center gap-2">
+                <span>A4 纸质单据打印预览</span>
+                <span className="text-[11px] font-normal text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full hidden sm:inline">
+                  按 ESC 键或点击遮罩可关闭
+                </span>
               </h3>
               <p className="text-xs text-slate-500 font-medium">
-                自动适配标准 A4 纸张排版，适合张贴在冰箱或书桌旁
+                已自动优化 A4 标准纸张排版，隐藏屏幕操作按钮
               </p>
             </div>
           </div>
 
           {/* Toggle Type & Actions */}
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={() => { sounds.playClick(); setDocType('daily'); }}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
                 docType === 'daily'
                   ? 'bg-primary text-white shadow-sm'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
-              今日作业学习单
+              <FileText className="w-3.5 h-3.5" />
+              <span>今日作业单</span>
             </button>
             <button
               onClick={() => { sounds.playClick(); setDocType('weekly'); }}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
                 docType === 'weekly'
                   ? 'bg-amber-500 text-white shadow-sm'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
-              周成长探险喜报
+              <Award className="w-3.5 h-3.5" />
+              <span>周成长喜报</span>
             </button>
 
+            {/* Primary Print Button */}
             <button
               onClick={handlePrint}
-              className="px-4 py-1.5 btn-squishy-primary text-xs font-headline font-bold flex items-center gap-1.5 ml-2"
+              className="px-4 py-2 btn-squishy-primary text-xs sm:text-sm font-headline font-bold flex items-center gap-2 ml-1 shadow-neo-primary"
+              title="调用系统打印机打印 (A4)"
             >
               <Printer className="w-4 h-4" />
               <span>立即打印</span>
             </button>
 
+            {/* Close Button */}
             <button
-              onClick={onClose}
-              className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 transition-colors ml-1"
+              onClick={() => { sounds.playClick(); onClose(); }}
+              className="px-3 py-2 btn-squishy-white text-xs sm:text-sm font-bold flex items-center gap-1 text-slate-600 hover:text-slate-900 ml-1"
+              title="关闭预览 (ESC)"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
+              <span>关闭 (ESC)</span>
             </button>
           </div>
         </div>
@@ -239,6 +276,29 @@ export default function PrintModal({
             </div>
           )}
         </div>
+
+        {/* Bottom Floating Actions Footer - Extra Convenience so user doesn't have to scroll back to top */}
+        <div className="pt-3 border-t border-slate-200 flex items-center justify-between gap-4 no-print">
+          <span className="text-xs text-slate-500 font-medium hidden sm:inline">
+            💡 提示：打印时请在打印设置中勾选「背景图形」，以获得最佳拟物效果。
+          </span>
+          <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+            <button
+              onClick={() => { sounds.playClick(); onClose(); }}
+              className="px-4 py-2 btn-squishy-white text-xs sm:text-sm font-bold text-slate-600"
+            >
+              返回关闭 (ESC)
+            </button>
+            <button
+              onClick={handlePrint}
+              className="px-5 py-2 btn-squishy-primary text-xs sm:text-sm font-headline font-bold flex items-center gap-2"
+            >
+              <Printer className="w-4 h-4" />
+              <span>立即打印此单据</span>
+            </button>
+          </div>
+        </div>
+
       </div>
     </div>
   );

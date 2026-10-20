@@ -163,18 +163,6 @@ export default function Header({
             <span className="hidden sm:inline">专注计时</span>
           </button>
 
-          {/* Action: Print */}
-          <button
-            onClick={() => {
-              sounds.playClick();
-              onOpenPrint();
-            }}
-            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-surface-low hover:bg-surface-container border border-slate-200/80 text-onSurface text-xs sm:text-sm font-semibold transition-all btn-squishy"
-            title="打印今日 A4 打卡学习单"
-          >
-            <Printer className="w-4 h-4 text-slate-600" />
-            <span className="hidden sm:inline">打印打卡单</span>
-          </button>
 
           {/* Action: Parent Mode */}
           <button
