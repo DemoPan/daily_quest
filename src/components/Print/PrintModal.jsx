@@ -54,27 +54,10 @@ export default function PrintModal({
     >
       <div className="bg-white rounded-3xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-6 my-4 sm:my-8 animate-in fade-in slide-in-from-top-4 duration-200">
         
-        {/* Sticky Top Control Toolbar - Always Visible Even When Scrolled */}
-        <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-md pt-4 pb-4 -mt-6 -mx-6 px-6 sm:-mt-8 sm:-mx-8 sm:px-8 border-b border-slate-200 shadow-sm rounded-t-3xl flex flex-col md:flex-row md:items-center justify-between gap-4 no-print">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-primary text-white flex items-center justify-center font-bold text-xl shadow-neo-primary shrink-0">
-              🖨️
-            </div>
-            <div>
-              <h3 className="font-headline font-bold text-base sm:text-lg text-onSurface flex items-center gap-2">
-                <span>A4 纸质单据打印预览</span>
-                <span className="text-[11px] font-normal text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full hidden sm:inline">
-                  按 ESC 键或点击遮罩可关闭
-                </span>
-              </h3>
-              <p className="text-xs text-slate-500 font-medium">
-                已自动优化 A4 标准纸张排版，隐藏屏幕操作按钮
-              </p>
-            </div>
-          </div>
-
-          {/* Toggle Type & Actions */}
-          <div className="flex flex-wrap items-center gap-2">
+        {/* Sticky Top Control Toolbar - Compact & Clean */}
+        <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-md py-3 -mt-6 -mx-6 px-6 sm:-mt-8 sm:-mx-8 sm:px-8 border-b border-slate-200 shadow-sm rounded-t-3xl flex items-center justify-between gap-4 no-print">
+          {/* Toggle Type */}
+          <div className="flex items-center gap-2">
             <button
               onClick={() => { sounds.playClick(); setDocType('daily'); }}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
@@ -97,11 +80,14 @@ export default function PrintModal({
               <Award className="w-3.5 h-3.5" />
               <span>周成长喜报</span>
             </button>
+          </div>
 
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2">
             {/* Primary Print Button */}
             <button
               onClick={handlePrint}
-              className="px-4 py-2 btn-squishy-primary text-xs sm:text-sm font-headline font-bold flex items-center gap-2 ml-1 shadow-neo-primary"
+              className="px-4 py-1.5 btn-squishy-primary text-xs sm:text-sm font-headline font-bold flex items-center gap-2 shadow-neo-primary"
               title="调用系统打印机打印 (A4)"
             >
               <Printer className="w-4 h-4" />
@@ -111,7 +97,7 @@ export default function PrintModal({
             {/* Close Button */}
             <button
               onClick={() => { sounds.playClick(); onClose(); }}
-              className="px-3 py-2 btn-squishy-white text-xs sm:text-sm font-bold flex items-center gap-1 text-slate-600 hover:text-slate-900 ml-1"
+              className="px-3 py-1.5 btn-squishy-white text-xs sm:text-sm font-bold flex items-center gap-1 text-slate-600 hover:text-slate-900"
               title="关闭预览 (ESC)"
             >
               <X className="w-4 h-4" />
