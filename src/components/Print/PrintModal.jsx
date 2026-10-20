@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Printer, X, Award, FileText } from 'lucide-react';
 import { sounds } from '../../utils/sound';
+import { printIsolatedElement } from '../../utils/printer';
 
 export default function PrintModal({
   isOpen,
@@ -31,7 +32,12 @@ export default function PrintModal({
 
   const handlePrint = () => {
     sounds.playStamp();
-    window.print();
+    const printableEl = document.getElementById('printable-document');
+    if (printableEl) {
+      printIsolatedElement(printableEl, docType === 'daily' ? `${currentChild.name} · 每日作业闯关打卡单` : `${currentChild.name} · 周成长探险喜报`);
+    } else {
+      window.print();
+    }
   };
 
   const todayStr = new Date().toLocaleDateString('zh-CN', {
@@ -107,62 +113,76 @@ export default function PrintModal({
         </div>
 
         {/* Printable Area */}
-        <div className="printable-area border border-slate-300 rounded-2xl p-6 sm:p-8 bg-white text-black space-y-6">
+        <div id="printable-document" className="printable-area border border-slate-300 rounded-2xl p-6 sm:p-8 bg-white text-black space-y-5">
           {docType === 'daily' ? (
             /* Document 1: Daily Homework Sheet */
-            <div className="space-y-6">
+            <div className="space-y-4">
               {/* Document Header */}
-              <div className="text-center border-b-2 border-slate-800 pb-4 space-y-1">
+              <div className="text-center border-b-2 border-slate-800 pb-3 space-y-1">
                 <div className="flex items-center justify-center gap-2">
                   <span className="text-2xl">🧭</span>
                   <h1 className="text-2xl font-bold tracking-tight">探险学堂 · 每日作业闯关打卡单</h1>
                 </div>
-                <div className="flex items-center justify-between text-xs text-slate-600 pt-2 px-2">
+                <div className="flex items-center justify-between text-xs text-slate-600 pt-1 px-1">
                   <span>探险家：<strong>{currentChild.name} ({currentChild.grade})</strong></span>
                   <span>日期：<strong>{todayStr}</strong></span>
-                  <span>目标金币：<strong>+35 🪙</strong></span>
+                  <span>今日总目标：<strong>+35 🪙</strong></span>
                 </div>
               </div>
 
               {/* Tasks Table */}
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {currentChild.subjects.map((subject) => (
-                  <div key={subject.id} className="border border-slate-300 rounded-xl overflow-hidden">
-                    <div className="bg-slate-100 px-4 py-2 font-bold text-xs flex items-center justify-between border-b border-slate-300">
+                  <div key={subject.id} className="subject-block border border-slate-300 rounded-xl overflow-hidden">
+                    <div className="subject-title-bar bg-slate-100 px-3.5 py-1.5 font-bold text-xs flex items-center justify-between border-b border-slate-300">
                       <span>{subject.icon} {subject.name}</span>
-                      <span className="text-slate-500">{subject.tasks.length} 项任务</span>
+                      <span className="text-slate-500 font-normal">{subject.tasks.length} 项任务</span>
                     </div>
-                    <table className="w-full text-xs text-left">
-                      <thead className="bg-slate-50 text-slate-500 border-b border-slate-200">
+                    <table className="w-full text-xs text-left table-fixed border-collapse">
+                      <colgroup>
+                        <col style={{ width: '70px' }} />
+                        <col style={{ width: '160px' }} />
+                        <col />
+                        <col style={{ width: '56px' }} />
+                        <col style={{ width: '76px' }} />
+                        <col style={{ width: '92px' }} />
+                      </colgroup>
+                      <thead className="bg-slate-50 text-slate-600 border-b border-slate-300">
                         <tr>
-                          <th className="py-2 px-3 w-16">类别</th>
-                          <th className="py-2 px-3 w-40">关卡任务</th>
-                          <th className="py-2 px-3">具体要求 / 页码</th>
-                          <th className="py-2 px-3 w-16 text-center">预估</th>
-                          <th className="py-2 px-3 w-20 text-center">孩子自查</th>
-                          <th className="py-2 px-3 w-24 text-center">家长核验</th>
+                          <th className="py-1.5 px-2 text-center font-bold">类别</th>
+                          <th className="py-1.5 px-2 font-bold">关卡任务</th>
+                          <th className="py-1.5 px-2 font-bold">具体要求 / 页码</th>
+                          <th className="py-1.5 px-2 text-center font-bold">预估</th>
+                          <th className="py-1.5 px-2 text-center font-bold">孩子自查</th>
+                          <th className="py-1.5 px-2 text-center font-bold">家长核验</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-200">
                         {subject.tasks.map((task) => (
                           <tr key={task.id} className="hover:bg-slate-50/50">
-                            <td className="py-2.5 px-3 font-semibold">
-                              {task.type === 'home' ? '🏠 回家' : '🎒 课堂'}
+                            <td className="py-1.5 px-2 text-center">
+                              <span className={task.type === 'home' ? 'badge-home' : 'badge-school'}>
+                                {task.type === 'home' ? '🏠 回家' : '🎒 课堂'}
+                              </span>
                             </td>
-                            <td className="py-2.5 px-3 font-bold text-slate-800">
+                            <td className="py-1.5 px-2 font-bold text-slate-800">
                               {task.title}
                             </td>
-                            <td className="py-2.5 px-3 text-slate-600">
+                            <td className="py-1.5 px-2 text-slate-700 leading-snug">
                               {task.requirement}
                             </td>
-                            <td className="py-2.5 px-3 text-center text-slate-500">
+                            <td className="py-1.5 px-2 text-center text-slate-500">
                               {task.estimatedMinutes}m
                             </td>
-                            <td className="py-2.5 px-3 text-center font-bold">
-                              {task.completed ? '✓ 已完成' : '□'}
+                            <td className="py-1.5 px-2 text-center font-bold">
+                              {task.completed ? <span className="badge-completed">✓ 已完成</span> : <span className="text-slate-400">□</span>}
                             </td>
-                            <td className="py-2.5 px-3 text-center font-bold text-amber-700">
-                              {task.verified ? `⭐ ${task.verifiedTime || '已盖印'}` : '□ 待核'}
+                            <td className="py-1.5 px-2 text-center font-bold text-amber-700">
+                              {task.verified ? (
+                                <span className="badge-stamp">⭐ {task.verifiedTime || '已盖印'}</span>
+                              ) : (
+                                <span className="text-slate-400 font-normal">□ 待核</span>
+                              )}
                             </td>
                           </tr>
                         ))}
