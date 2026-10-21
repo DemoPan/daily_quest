@@ -11,7 +11,9 @@ import {
   Filter, 
   Printer, 
   CheckCircle2, 
-  AlertCircle 
+  AlertCircle,
+  AlertTriangle,
+  X 
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sounds } from '../../utils/sound';
@@ -30,6 +32,7 @@ export default function DailyQuestPage({
   const [filterType, setFilterType] = useState('all'); // all, home, school, pending, unverified
   const [showAddModal, setShowAddModal] = useState(false);
   const [targetSubjectId, setTargetSubjectId] = useState(null);
+  const [taskToDelete, setTaskToDelete] = useState(null); // { subjectId, subjectName, task }
 
   // New task form state
   const [newTaskTitle, setNewTaskTitle] = useState('');
@@ -395,9 +398,11 @@ export default function DailyQuestPage({
                           <button
                             onClick={() => {
                               sounds.playClick();
-                              if (confirm(`确定要移除今日任务「${task.title}」吗？`)) {
-                                onDeleteTask(subject.id, task.id);
-                              }
+                              setTaskToDelete({
+                                subjectId: subject.id,
+                                subjectName: subject.name,
+                                task
+                              });
                             }}
                             className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
                             title="删除今日不需要的作业条目"
@@ -560,6 +565,102 @@ export default function DailyQuestPage({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Task Secondary Confirmation Modal */}
+      {taskToDelete && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-150"
+          onClick={() => setTaskToDelete(null)}
+        >
+          <div 
+            className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200/90 relative space-y-5 animate-in zoom-in-95 duration-150"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => {
+                sounds.playClick();
+                setTaskToDelete(null);
+              }}
+              className="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            {/* Header with Warning Icon */}
+            <div className="flex items-start gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 border border-rose-200/60 flex items-center justify-center shrink-0 shadow-sm">
+                <Trash2 className="w-6 h-6 text-rose-600" />
+              </div>
+              <div className="space-y-1 pr-6">
+                <h3 className="font-headline font-black text-lg text-onSurface">
+                  确认移除今日作业？
+                </h3>
+                <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                  移除后将从今日打卡清单中排除，各科关卡与总进度分母将动态重算。
+                </p>
+              </div>
+            </div>
+
+            {/* Task Preview Card */}
+            <div className="bg-slate-50/80 rounded-2xl p-4 border border-slate-200/80 space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-white border border-slate-200 text-slate-700">
+                  {taskToDelete.subjectName?.split('·')[0].trim() || '学科'}
+                </span>
+                <span className={`text-[11px] font-bold px-2 py-0.5 rounded-md ${
+                  taskToDelete.task.type === 'home'
+                    ? 'bg-amber-100 text-amber-800 border border-amber-200'
+                    : 'bg-blue-100 text-blue-800 border border-blue-200'
+                }`}>
+                  {taskToDelete.task.type === 'home' ? '🏠 回家作业' : '🎒 课堂作业'}
+                </span>
+              </div>
+              <div className="font-headline font-bold text-sm text-onSurface">
+                {taskToDelete.task.title}
+              </div>
+              {taskToDelete.task.requirement && (
+                <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                  {taskToDelete.task.requirement}
+                </p>
+              )}
+              {(taskToDelete.task.completed || taskToDelete.task.verified) && (
+                <div className="pt-2 border-t border-slate-200/60 flex items-center gap-1.5 text-xs text-amber-700 font-bold">
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                  <span>注意：该作业已打卡或核验，删除将相应扣减今日经验与统计！</span>
+                </div>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex items-center justify-end gap-3 pt-1">
+              <button
+                type="button"
+                onClick={() => {
+                  sounds.playClick();
+                  setTaskToDelete(null);
+                }}
+                className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs sm:text-sm transition-all btn-squishy"
+              >
+                再想想 (取消)
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  sounds.playStamp();
+                  onDeleteTask(taskToDelete.subjectId, taskToDelete.task.id);
+                  setTaskToDelete(null);
+                }}
+                className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs sm:text-sm shadow-[0_4px_0_0_#9f1239] active:translate-y-0.5 transition-all flex items-center justify-center gap-1.5 btn-squishy"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>确认移除</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
