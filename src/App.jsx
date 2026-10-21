@@ -4,6 +4,7 @@ import DailyQuestPage from './components/DailyQuest/DailyQuestPage';
 import TreasureShopPage from './components/TreasureShop/TreasureShopPage';
 import KnowledgeMapPage from './components/KnowledgeMap/KnowledgeMapPage';
 import ParentBenchPage from './components/ParentBench/ParentBenchPage';
+import StatsContainer from './components/Stats/StatsContainer';
 import FocusTimerModal from './components/FocusTimer/FocusTimerModal';
 import PrintModal from './components/Print/PrintModal';
 import { initialChildrenData } from './data/defaultData';
@@ -450,6 +451,16 @@ export default function App() {
               setIsPrintOpen(true);
             }}
             isParentMode={isParentMode}
+          />
+        )}
+
+        {activeTab === 'stats' && (
+          <StatsContainer
+            currentChild={currentChild}
+            onOpenPrint={() => {
+              setPrintDocType('weekly');
+              setIsPrintOpen(true);
+            }}
           />
         )}
 

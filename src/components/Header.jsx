@@ -12,6 +12,7 @@ import {
   BookOpen, 
   Map, 
   Award,
+  BarChart3,
   Cloud,
   CloudOff,
   RefreshCw
@@ -36,6 +37,7 @@ export default function Header({
 
   const tabs = [
     { id: 'daily', name: '每日闯关', icon: CheckCircle2 },
+    { id: 'stats', name: '作业统计', icon: BarChart3 },
     { id: 'shop', name: '宝藏兑换屋', icon: Award },
     { id: 'map', name: '知识寻宝地图', icon: Map },
     { id: 'parent', name: '家长核验台', icon: ShieldCheck }
