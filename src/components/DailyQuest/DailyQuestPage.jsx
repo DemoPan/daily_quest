@@ -13,6 +13,7 @@ import {
   CheckCircle2, 
   AlertCircle,
   AlertTriangle,
+  Calendar,
   X 
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -61,6 +62,11 @@ export default function DailyQuestPage({
 
   const completionPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
   const verificationPercentage = totalTasks > 0 ? Math.round((verifiedTasks / totalTasks) * 100) : 0;
+
+  // 动态获取当天的真实日期
+  const today = new Date();
+  const weekDays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+  const todayFormatted = `${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}日 ${weekDays[today.getDay()]}`;
 
   const handleOpenAddModal = (subjectId = null) => {
     sounds.playClick();
@@ -128,6 +134,14 @@ export default function DailyQuestPage({
       {/* Top Banner & Quick Controls */}
       <div className="neo-card p-5 sm:p-6 bg-gradient-to-r from-blue-50/70 via-indigo-50/40 to-amber-50/60 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
+          {/* 今日真实日期徽章 */}
+          <div className="flex flex-wrap items-center gap-2 mb-2">
+            <span className="text-xs font-bold text-primary bg-primary-light border border-primary/20 px-3 py-1 rounded-full flex items-center gap-1.5 shadow-sm">
+              <Calendar className="w-3.5 h-3.5 text-primary" />
+              <span>{todayFormatted} · 今日闯关</span>
+            </span>
+          </div>
+
           <div className="flex items-center gap-2">
             <h1 className="font-headline font-bold text-2xl sm:text-3xl text-onSurface tracking-tight">
               每日作业动态闯关打卡表
@@ -195,7 +209,7 @@ export default function DailyQuestPage({
             className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 btn-squishy-primary text-sm font-headline"
           >
             <Plus className="w-4 h-4" />
-            <span>+ 登记新作业</span>
+            <span>登记新作业</span>
           </button>
           <button
             onClick={() => { sounds.playClick(); onOpenPrint(); }}

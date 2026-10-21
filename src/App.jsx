@@ -11,7 +11,7 @@ import { initialChildrenData } from './data/defaultData';
 import { sounds } from './utils/sound';
 import { api } from './services/api';
 
-const STORAGE_KEY = 'kids_quest_v1_data';
+const STORAGE_KEY = 'kids_quest_v2_data';
 
 export default function App() {
   // Load data from LocalStorage or initialize with seed data

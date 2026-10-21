@@ -23,6 +23,23 @@ export default function StatsContainer({
     setSelectedDay(null);
   };
 
+  const daysList = childStats.historyDays || [];
+  const currentIndex = selectedDay ? daysList.findIndex((d) => d.id === selectedDay.id) : -1;
+  const hasPrev = currentIndex > 0;
+  const hasNext = currentIndex >= 0 && currentIndex < daysList.length - 1;
+
+  const handlePrevDay = () => {
+    if (currentIndex > 0) {
+      setSelectedDay(daysList[currentIndex - 1]);
+    }
+  };
+
+  const handleNextDay = () => {
+    if (currentIndex >= 0 && currentIndex < daysList.length - 1) {
+      setSelectedDay(daysList[currentIndex + 1]);
+    }
+  };
+
   if (viewMode === 'detail' && selectedDay) {
     return (
       <DailyQuestDetailPage
@@ -30,6 +47,10 @@ export default function StatsContainer({
         dayData={selectedDay}
         onBack={handleBackToList}
         onOpenPrint={onOpenPrint}
+        onPrevDay={handlePrevDay}
+        onNextDay={handleNextDay}
+        hasPrev={hasPrev}
+        hasNext={hasNext}
       />
     );
   }

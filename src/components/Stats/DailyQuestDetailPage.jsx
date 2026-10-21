@@ -5,6 +5,7 @@ import {
   Share2, 
   ChevronLeft, 
   ChevronRight, 
+  CheckCircle,
   CheckCircle2, 
   Clock, 
   Coins, 
@@ -25,13 +26,23 @@ export default function DailyQuestDetailPage({
   currentChild, 
   dayData, 
   onBack, 
-  onOpenPrint 
+  onOpenPrint,
+  onPrevDay,
+  onNextDay,
+  hasPrev,
+  hasNext
 }) {
   const [showShareToast, setShowShareToast] = useState(false);
   const [isEditingNote, setIsEditingNote] = useState(false);
   const [parentNoteText, setParentNoteText] = useState(
     dayData.parentSummaryComment || '大宝今天表现优异，独立攻克难题，按时通关！'
   );
+
+  // 当 dayData 切换时同步更新评语文本
+  React.useEffect(() => {
+    setParentNoteText(dayData.parentSummaryComment || '孩子今天表现优异，独立攻克难题，按时通关！');
+    setIsEditingNote(false);
+  }, [dayData]);
 
   const handleShare = () => {
     sounds.playCoin();
@@ -60,17 +71,35 @@ export default function DailyQuestDetailPage({
         {/* 日期指示器 */}
         <div className="flex items-center gap-2 bg-surface px-4 py-1.5 rounded-2xl border border-slate-200 shadow-neo-sm">
           <button 
-            onClick={() => sounds.playClick()}
-            className="w-7 h-7 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700"
+            disabled={!hasPrev}
+            onClick={() => {
+              if (hasPrev && onPrevDay) {
+                sounds.playClick();
+                onPrevDay();
+              }
+            }}
+            className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors ${
+              hasPrev ? 'hover:bg-slate-100 text-slate-600 cursor-pointer' : 'text-slate-200 cursor-not-allowed'
+            }`}
+            title="前一天"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <span className="font-headline font-black text-sm text-onSurface">
+          <span className="font-headline font-black text-sm text-onSurface min-w-[120px] text-center">
             {dayData.dateStr} ({dayData.dayOfWeek})
           </span>
           <button 
-            onClick={() => sounds.playClick()}
-            className="w-7 h-7 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700"
+            disabled={!hasNext}
+            onClick={() => {
+              if (hasNext && onNextDay) {
+                sounds.playClick();
+                onNextDay();
+              }
+            }}
+            className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors ${
+              hasNext ? 'hover:bg-slate-100 text-slate-600 cursor-pointer' : 'text-slate-200 cursor-not-allowed'
+            }`}
+            title="后一天"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
