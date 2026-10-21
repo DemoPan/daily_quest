@@ -8,6 +8,7 @@ import FocusTimerModal from './components/FocusTimer/FocusTimerModal';
 import PrintModal from './components/Print/PrintModal';
 import { initialChildrenData } from './data/defaultData';
 import { sounds } from './utils/sound';
+import { api } from './services/api';
 
 const STORAGE_KEY = 'kids_quest_v1_data';
 
@@ -28,6 +29,7 @@ export default function App() {
   const [currentChildId, setCurrentChildId] = useState('dabao');
   const [activeTab, setActiveTab] = useState('daily'); // 'daily', 'shop', 'map', 'parent'
   const [isParentMode, setIsParentMode] = useState(false);
+  const [cloudSyncStatus, setCloudSyncStatus] = useState('syncing'); // 'synced' | 'syncing' | 'offline'
 
   // Focus Timer Modal State
   const [isTimerOpen, setIsTimerOpen] = useState(false);
@@ -38,14 +40,68 @@ export default function App() {
   const [isPrintOpen, setIsPrintOpen] = useState(false);
   const [printDocType, setPrintDocType] = useState('daily');
 
-  // Save to LocalStorage whenever childrenData changes
+  // 1. 初次加载：优先拉取 MongoDB Atlas 云端最新数据
+  useEffect(() => {
+    let isMounted = true;
+    async function initCloudData() {
+      try {
+        setCloudSyncStatus('syncing');
+        const remoteData = await api.getChildren();
+        if (isMounted && remoteData && Object.keys(remoteData).length > 0) {
+          setChildrenData(remoteData);
+          setCloudSyncStatus('synced');
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(remoteData));
+        } else if (isMounted) {
+          setCloudSyncStatus('synced');
+        }
+      } catch (err) {
+        console.warn('⚠️ [Cloud] 无法连接云端数据库，自动降级为本地离线模式:', err.message);
+        if (isMounted) setCloudSyncStatus('offline');
+      }
+    }
+    initCloudData();
+    return () => { isMounted = false; };
+  }, []);
+
+  // 2. 数据变动时：即时保存 LocalStorage + 防抖同步至云端 MongoDB
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(childrenData));
     } catch (e) {
       console.error('Failed to save to localStorage', e);
     }
+
+    if (!childrenData || Object.keys(childrenData).length === 0) return;
+
+    const timer = setTimeout(async () => {
+      try {
+        setCloudSyncStatus('syncing');
+        await api.syncAll(childrenData);
+        setCloudSyncStatus('synced');
+      } catch (err) {
+        console.warn('⚠️ [Cloud] 异步保存至云端失败:', err.message);
+        setCloudSyncStatus('offline');
+      }
+    }, 600);
+
+    return () => clearTimeout(timer);
   }, [childrenData]);
+
+  // 手动刷新云端数据
+  const handleManualSync = async () => {
+    try {
+      setCloudSyncStatus('syncing');
+      const remoteData = await api.getChildren();
+      if (remoteData && Object.keys(remoteData).length > 0) {
+        setChildrenData(remoteData);
+        setCloudSyncStatus('synced');
+        sounds.playSuccess();
+      }
+    } catch (err) {
+      console.warn('⚠️ [Cloud] 刷新失败:', err.message);
+      setCloudSyncStatus('offline');
+    }
+  };
 
   const currentChild = childrenData[currentChildId] || childrenData.dabao;
 
@@ -359,6 +415,8 @@ export default function App() {
         onSwitchChild={setCurrentChildId}
         activeTab={activeTab}
         onSelectTab={setActiveTab}
+        cloudSyncStatus={cloudSyncStatus}
+        onManualSync={handleManualSync}
         onOpenTimer={() => {
           setTimerTaskTitle('自主专注关卡');
           setTimerMinutes(25);

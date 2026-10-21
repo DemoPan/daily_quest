@@ -11,7 +11,10 @@ import {
   CheckCircle2, 
   BookOpen, 
   Map, 
-  Award 
+  Award,
+  Cloud,
+  CloudOff,
+  RefreshCw
 } from 'lucide-react';
 import { sounds } from '../utils/sound';
 
@@ -24,7 +27,9 @@ export default function Header({
   onOpenTimer,
   onOpenPrint,
   isParentMode,
-  onToggleParentMode
+  onToggleParentMode,
+  cloudSyncStatus = 'synced',
+  onManualSync
 }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const currentChild = childrenData[currentChildId];
@@ -55,6 +60,37 @@ export default function Header({
               <span className="bg-tertiary-fixed text-tertiary-dark text-xs font-bold px-2 py-0.5 rounded-full border border-tertiary/20 tracking-wider">
                 DAILY QUEST
               </span>
+              {/* Cloud Sync Status Indicator */}
+              <button
+                onClick={onManualSync}
+                className="cursor-pointer transition-transform hover:scale-105 active:scale-95"
+                title={
+                  cloudSyncStatus === 'synced'
+                    ? '云端数据已连接 (MongoDB Atlas) · 点击手动刷新'
+                    : cloudSyncStatus === 'syncing'
+                    ? '正在同步数据至云端...'
+                    : '当前为离线模式 (数据保存在本地)'
+                }
+              >
+                {cloudSyncStatus === 'synced' && (
+                  <span className="flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100/80 px-2 py-0.5 rounded-full border border-emerald-200">
+                    <Cloud className="w-3.5 h-3.5 text-emerald-600" />
+                    <span className="hidden sm:inline">云端已同步</span>
+                  </span>
+                )}
+                {cloudSyncStatus === 'syncing' && (
+                  <span className="flex items-center gap-1 text-[11px] font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
+                    <RefreshCw className="w-3.5 h-3.5 text-blue-600 animate-spin" />
+                    <span className="hidden sm:inline">同步中...</span>
+                  </span>
+                )}
+                {cloudSyncStatus === 'offline' && (
+                  <span className="flex items-center gap-1 text-[11px] font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded-full border border-slate-300">
+                    <CloudOff className="w-3.5 h-3.5 text-slate-500" />
+                    <span className="hidden sm:inline">本地离线</span>
+                  </span>
+                )}
+              </button>
             </div>
             <p className="text-xs text-onSurface-variant font-medium hidden sm:block">
               每日作业闯关打卡 · 智慧岛航海记
