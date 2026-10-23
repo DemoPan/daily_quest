@@ -15,6 +15,7 @@ import {
   AlertTriangle,
   Calendar,
   Bot,
+  RotateCcw,
   X 
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -28,6 +29,7 @@ export default function DailyQuestPage({
   onDeleteTask,
   onAddTask,
   onUpdateTaskRequirement,
+  onResetTodayTasks,
   onOpenTimerForTask,
   onOpenPrint,
   onOpenQuickInput,
@@ -228,6 +230,21 @@ export default function DailyQuestPage({
             <Plus className="w-4 h-4" />
             <span>登记新作业</span>
           </button>
+
+          <button
+            onClick={() => {
+              sounds.playStamp();
+              if (window.confirm('确定要重置今日作业吗？\n将恢复今日 17 项全科默认作业，并将所有打卡和核验印章重置为待完成。')) {
+                if (onResetTodayTasks) onResetTodayTasks();
+              }
+            }}
+            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-2xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/90 font-headline font-bold text-xs sm:text-sm btn-squishy transition-all"
+            title="恢复今日全科默认作业并将状态重置为待完成"
+          >
+            <RotateCcw className="w-3.5 h-3.5 text-amber-700" />
+            <span>重置今日作业</span>
+          </button>
+
           <button
             onClick={() => { sounds.playClick(); onOpenPrint(); }}
             className="flex items-center justify-center gap-2 px-4 py-2.5 btn-squishy-white text-sm"

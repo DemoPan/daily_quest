@@ -12,20 +12,79 @@ import { initialChildrenData } from './data/defaultData';
 import { sounds } from './utils/sound';
 import { api } from './services/api';
 
-const STORAGE_KEY = 'kids_quest_v2_data';
+const STORAGE_KEY = 'kids_quest_v3_data';
+
+// 获取今日标准日期 key (YYYY-MM-DD)
+export const getTodayDateKey = () => {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+// 每日自动重置与数据清洗：确保每天开始都是崭新的 17 项全科默认作业，打卡与核验全部重置为未完成
+export const sanitizeDailyData = (dataMap) => {
+  if (!dataMap || typeof dataMap !== 'object') return initialChildrenData;
+  const todayKey = getTodayDateKey();
+  const result = { ...dataMap };
+
+  const childIds = ['dabao', 'erbao'];
+  for (const childId of childIds) {
+    const defaultChild = initialChildrenData[childId] || initialChildrenData.dabao;
+    const current = result[childId] ? { ...result[childId] } : { ...defaultChild };
+
+    const isNewDay = current.lastActiveDate !== todayKey;
+
+    if (isNewDay) {
+      // 跨天或首次加载旧缓存数据：自动重置为今日全新标准作业清单，打卡与核验重置为 false，今日能量归零
+      result[childId] = {
+        ...current,
+        lastActiveDate: todayKey,
+        todayEnergyXP: 0,
+        subjects: defaultChild.subjects.map((sub) => ({
+          ...sub,
+          tasks: sub.tasks.map((task) => ({
+            ...task,
+            completed: false,
+            verified: false,
+            verifiedTime: null
+          }))
+        }))
+      };
+    } else {
+      // 同一天：如果科目缺失则补齐默认科目
+      if (!current.subjects || current.subjects.length === 0) {
+        current.subjects = defaultChild.subjects.map((sub) => ({
+          ...sub,
+          tasks: sub.tasks.map((task) => ({
+            ...task,
+            completed: false,
+            verified: false,
+            verifiedTime: null
+          }))
+        }));
+      }
+      result[childId] = current;
+    }
+  }
+
+  return result;
+};
 
 export default function App() {
   // Load data from LocalStorage or initialize with seed data
   const [childrenData, setChildrenData] = useState(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
+      const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('kids_quest_v2_data');
       if (saved) {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        return sanitizeDailyData(parsed);
       }
     } catch (e) {
       console.error('Failed to parse localStorage data', e);
     }
-    return initialChildrenData;
+    return sanitizeDailyData(initialChildrenData);
   });
 
   const [currentChildId, setCurrentChildId] = useState('dabao');
@@ -50,9 +109,10 @@ export default function App() {
         setCloudSyncStatus('syncing');
         const remoteData = await api.getChildren();
         if (isMounted && remoteData && Object.keys(remoteData).length > 0) {
-          setChildrenData(remoteData);
+          const sanitized = sanitizeDailyData(remoteData);
+          setChildrenData(sanitized);
           setCloudSyncStatus('synced');
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(remoteData));
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitized));
         } else if (isMounted) {
           setCloudSyncStatus('synced');
         }
@@ -95,7 +155,8 @@ export default function App() {
       setCloudSyncStatus('syncing');
       const remoteData = await api.getChildren();
       if (remoteData && Object.keys(remoteData).length > 0) {
-        setChildrenData(remoteData);
+        const sanitized = sanitizeDailyData(remoteData);
+        setChildrenData(sanitized);
         setCloudSyncStatus('synced');
         sounds.playSuccess();
       }
@@ -117,6 +178,28 @@ export default function App() {
         [currentChildId]: updatedChild
       };
     });
+  };
+
+  // 一键重置今日作业：恢复今日全部标准默认作业，打卡与核验全部置为未完成
+  const handleResetTodayTasks = () => {
+    updateCurrentChild((child) => {
+      const defaultChild = initialChildrenData[currentChildId] || initialChildrenData.dabao;
+      return {
+        ...child,
+        todayEnergyXP: 0,
+        lastActiveDate: getTodayDateKey(),
+        subjects: defaultChild.subjects.map((sub) => ({
+          ...sub,
+          tasks: sub.tasks.map((task) => ({
+            ...task,
+            completed: false,
+            verified: false,
+            verifiedTime: null
+          }))
+        }))
+      };
+    });
+    sounds.playSuccess();
   };
 
   // Task Completion Toggle (Child action)
@@ -485,6 +568,7 @@ export default function App() {
             onDeleteTask={handleDeleteTask}
             onAddTask={handleAddTask}
             onUpdateTaskRequirement={handleUpdateTaskRequirement}
+            onResetTodayTasks={handleResetTodayTasks}
             onOpenTimerForTask={(title, mins) => {
               setTimerTaskTitle(title);
               setTimerMinutes(mins || 15);
