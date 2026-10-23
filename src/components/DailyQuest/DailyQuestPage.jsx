@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sounds } from '../../utils/sound';
+import { useDialog } from '../../context/DialogContext';
 import DeleteHomeworkModal from './DeleteHomeworkModal';
 
 export default function DailyQuestPage({
@@ -39,6 +40,8 @@ export default function DailyQuestPage({
   const [showAddModal, setShowAddModal] = useState(false);
   const [targetSubjectId, setTargetSubjectId] = useState(null);
   const [taskToDelete, setTaskToDelete] = useState(null); // { subjectId, subjectName, task }
+
+  const { showConfirm, showAlert } = useDialog();
 
   // New task form state
   const [newTaskTitle, setNewTaskTitle] = useState('');
@@ -232,10 +235,18 @@ export default function DailyQuestPage({
           </button>
 
           <button
-            onClick={() => {
-              sounds.playStamp();
-              if (window.confirm('确定要重置今日作业吗？\n将恢复今日 17 项全科默认作业，并将所有打卡和核验印章重置为待完成。')) {
-                if (onResetTodayTasks) onResetTodayTasks();
+            onClick={async () => {
+              const confirmed = await showConfirm({
+                title: '重置今日作业',
+                message: '确定要重置今日作业吗？',
+                subMessage: '将恢复今日 17 项全科默认作业清单，并将所有打卡和核验印章重置为待完成。',
+                type: 'warning',
+                confirmText: '确认重置',
+                cancelText: '取消',
+                danger: true
+              });
+              if (confirmed && onResetTodayTasks) {
+                onResetTodayTasks();
               }
             }}
             className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-2xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/90 font-headline font-bold text-xs sm:text-sm btn-squishy transition-all"

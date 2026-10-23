@@ -17,12 +17,14 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sounds } from '../../utils/sound';
+import { useDialog } from '../../context/DialogContext';
 
 export default function KnowledgeMapPage({
   currentChild,
   onOpenWeeklyReport
 }) {
   const [selectedNode, setSelectedNode] = useState(null);
+  const { showAlert } = useDialog();
   const mapData = currentChild.monopolyMap;
 
   const handleNodeClick = (node, index) => {
@@ -141,7 +143,15 @@ export default function KnowledgeMapPage({
               本周航线 (7/7)
             </button>
             <button 
-              onClick={() => { sounds.playClick(); alert('已载入往期航海日记归档！'); }}
+              onClick={() => {
+                showAlert({
+                  title: '往期航海日记',
+                  message: '已成功载入往期航海日志档案！',
+                  subMessage: '历史通关印章与航海藏宝图均已归档保存，可在周报中随时查阅回顾。',
+                  type: 'info',
+                  confirmText: '好的'
+                });
+              }}
               className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 text-xs font-bold transition-all"
             >
               历史航海图
@@ -395,8 +405,14 @@ export default function KnowledgeMapPage({
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <button
             onClick={() => {
-              sounds.playClick();
-              alert('已生成分享短语与打卡海报，可直接发送微信家长群！');
+              showAlert({
+                title: '喜报分享成功',
+                message: '已生成周打卡喜报海报与成长分享短语！',
+                subMessage: '海报格式已适配手机屏幕，快快发送到家庭微信群，让长辈与好友一起为孩子的进步点赞喝彩吧！🎉',
+                type: 'success',
+                confirmText: '太棒了',
+                confetti: true
+              });
             }}
             className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 btn-squishy-white text-xs font-bold"
           >

@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sounds } from '../../utils/sound';
+import { useDialog } from '../../context/DialogContext';
 
 export default function ParentBenchPage({
   currentChild,
@@ -25,6 +26,7 @@ export default function ParentBenchPage({
   onGrantBonusCoins,
   isParentMode
 }) {
+  const { showAlert, showConfirm } = useDialog();
   const [bonusReason, setBonusReason] = useState('主动订正错题，书写极其端正！');
   const [bonusAmount, setBonusAmount] = useState(10);
   const [parentComment, setParentComment] = useState('今天作业专注高效，完全没有催促，特别棒！继续保持！');
@@ -39,9 +41,15 @@ export default function ParentBenchPage({
     });
   });
 
-  const handleBatchVerify = () => {
+  const handleBatchVerify = async () => {
     if (pendingVerificationTasks.length === 0) {
-      alert('今晚所有搞定的作业都已经核验过啦！');
+      await showAlert({
+        title: '全部核验完毕',
+        message: '今晚所有搞定的作业都已经核验过啦！',
+        subMessage: '暂无待核验的打卡项目，孩子今天表现很棒！',
+        type: 'info',
+        confirmText: '太棒了'
+      });
       return;
     }
 
@@ -56,19 +64,33 @@ export default function ParentBenchPage({
     }, 200);
 
     onBatchVerifyAll();
-    alert(`🎉 晚间核验完成！已为 ${pendingVerificationTasks.length} 项作业盖上金色火漆印章，并掉落对应金币！`);
+    await showAlert({
+      title: '晚间批量核验完成',
+      message: `已为 ${pendingVerificationTasks.length} 项作业盖上金色火漆印章，并掉落对应金币！`,
+      subMessage: '成长印章与金币已即时同步至孩子账户，可在宝藏屋随时查阅与兑换！',
+      type: 'success',
+      confirmText: '太棒了',
+      confetti: true
+    });
   };
 
-  const handleBonusSubmit = (e) => {
+  const handleBonusSubmit = async (e) => {
     e.preventDefault();
+    const amount = parseInt(bonusAmount, 10) || 10;
     sounds.playCoin();
     confetti({
       particleCount: 50,
       spread: 60,
       origin: { y: 0.6 }
     });
-    onGrantBonusCoins(parseInt(bonusAmount, 10) || 10, bonusReason);
-    alert(`已为${currentChild.name}发放额外奖励：+${bonusAmount} 🪙！`);
+    onGrantBonusCoins(amount, bonusReason);
+    await showAlert({
+      title: '鼓励金币发放成功',
+      message: `已为 ${currentChild.name} 额外发放 +${amount} 🪙 奖励金币！`,
+      subMessage: `表扬理由：「${bonusReason}」`,
+      type: 'coin',
+      confirmText: '好的'
+    });
   };
 
   return (
@@ -258,21 +280,40 @@ export default function ParentBenchPage({
                       ) : (
                         <>
                           <button
-                            onClick={() => {
+                            onClick={async () => {
                               sounds.playCoin();
                               onApproveWish(wish);
+                              await showAlert({
+                                title: '心愿已批准上架',
+                                message: `「${wish.title}」已正式在宝藏货架上架！`,
+                                subMessage: `标价 ${wish.cost} 🪙，孩子完成每日作业赚足金币后即可兑换！`,
+                                type: 'success',
+                                confirmText: '好的'
+                              });
                             }}
-                            className="px-3 py-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm flex items-center gap-1"
+                            className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm flex items-center gap-1 btn-squishy"
                           >
                             <Check className="w-3.5 h-3.5" />
                             <span>同意上架</span>
                           </button>
                           <button
-                            onClick={() => {
-                              sounds.playClick();
-                              onRejectWish(wish.id);
+                            onClick={async () => {
+                              const confirmed = await showConfirm({
+                                title: '退回心愿申请',
+                                message: `确定要退回「${wish.title}」的心愿申请吗？`,
+                                subMessage: '退回后该心愿将从审核台移除，建议与孩子沟通后重新提交。',
+                                type: 'warning',
+                                confirmText: '确认退回',
+                                cancelText: '取消',
+                                danger: true
+                              });
+                              if (confirmed) {
+                                sounds.playClick();
+                                onRejectWish(wish.id);
+                              }
                             }}
-                            className="px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-rose-100 text-slate-600 hover:text-rose-600 text-xs font-bold transition-colors"
+                            className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-rose-100 text-slate-600 hover:text-rose-600 text-xs font-bold transition-colors btn-squishy"
+                            title="退回申请"
                           >
                             <X className="w-3.5 h-3.5" />
                           </button>

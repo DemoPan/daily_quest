@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sounds } from '../../utils/sound';
+import { useDialog } from '../../context/DialogContext';
 
 export default function TreasureShopPage({
   currentChild,
@@ -28,6 +29,8 @@ export default function TreasureShopPage({
   const [sortOrder, setSortOrder] = useState('asc'); // asc: low to high, desc: high to low
   const [customWishTitle, setCustomWishTitle] = useState('');
   const [customWishCost, setCustomWishCost] = useState(70);
+
+  const { showAlert, showConfirm } = useDialog();
 
   const categories = [
     { id: 'all', name: `全部奖励 (${currentChild.rewards.length})`, icon: '🎁' },
@@ -51,14 +54,28 @@ export default function TreasureShopPage({
   const bigGoalRemaining = Math.max(0, bigGoal.targetCoins - currentChild.coins);
   const estimatedDays = Math.ceil(bigGoalRemaining / 20) || 1;
 
-  const handleRedeem = (reward) => {
+  const handleRedeem = async (reward) => {
     if (currentChild.coins < reward.cost) {
-      sounds.playClick();
-      alert(`金币还不够哦！当前拥有 ${currentChild.coins} 🪙，还差 ${reward.cost - currentChild.coins} 🪙，快去多攻克几个学习关卡吧！`);
+      await showAlert({
+        title: '金币还不够哦',
+        message: `当前拥有 ${currentChild.coins} 🪙，还差 ${reward.cost - currentChild.coins} 🪙。`,
+        subMessage: '快去每日打卡多攻克几个学习关卡，金币很快就能攒齐啦！',
+        type: 'coin',
+        confirmText: '去攻克关卡'
+      });
       return;
     }
 
-    if (confirm(`确定要消耗 ${reward.cost} 🪙 兑换「${reward.title}」吗？兑换后将生成核销卡券！`)) {
+    const confirmed = await showConfirm({
+      title: '确认兑换好礼',
+      message: `确定要消耗 ${reward.cost} 🪙 兑换「${reward.title}」吗？`,
+      subMessage: '兑换成功后将自动扣除金币，并生成专属核销卡券！',
+      type: 'coin',
+      confirmText: '确认兑换',
+      cancelText: '再想想'
+    });
+
+    if (confirmed) {
       sounds.playCoin();
       confetti({
         particleCount: 70,
@@ -69,21 +86,31 @@ export default function TreasureShopPage({
     }
   };
 
-  const handleCustomWishSubmit = (e) => {
+  const handleCustomWishSubmit = async (e) => {
     e.preventDefault();
     if (!customWishTitle.trim()) return;
 
+    const wishName = customWishTitle.trim();
+    const wishCost = parseInt(customWishCost, 10) || 50;
+
     sounds.playCoin();
     onSubmitWish({
-      title: customWishTitle.trim(),
-      cost: parseInt(customWishCost, 10) || 50,
+      title: wishName,
+      cost: wishCost,
       status: 'pending',
       submitTime: '刚刚提交'
     });
 
     setCustomWishTitle('');
     setCustomWishCost(70);
-    alert('心愿已成功递交到家长审核台！爸爸妈妈 24 小时内审批通过后就会在货架上架哦！');
+
+    await showAlert({
+      title: '心愿递交成功',
+      message: `「${wishName}」已成功递交到家长审核台！`,
+      subMessage: '爸爸妈妈在家长工作台审批通过后，就会立即上架到宝藏货架哦！',
+      type: 'success',
+      confirmText: '好的，期待上架'
+    });
   };
 
   const readyLedgerCount = currentChild.redeemedLedger.filter(item => item.status !== 'completed').length;
@@ -455,9 +482,17 @@ export default function TreasureShopPage({
                         </span>
                       ) : (
                         <button
-                          onClick={() => {
-                            sounds.playStamp();
-                            if (confirm(`向家长核销并享用「${item.title}」吗？`)) {
+                          onClick={async () => {
+                            const confirmed = await showConfirm({
+                              title: '核销心愿卡券',
+                              message: `向家长核销并享用「${item.title}」吗？`,
+                              subMessage: '核销后卡券状态将变更为「已完成」，快去开心享用您的专属特权吧！',
+                              type: 'success',
+                              confirmText: '确认核销',
+                              cancelText: '取消'
+                            });
+                            if (confirmed) {
+                              sounds.playStamp();
                               onVerifyLedgerItem(item.id);
                             }
                           }}
@@ -477,7 +512,14 @@ export default function TreasureShopPage({
           <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 font-medium">
             <span>已累计兑换并享用 14 项心愿好礼</span>
             <button 
-              onClick={() => { sounds.playClick(); alert('手账历史记录已完整保存！'); }}
+              onClick={() => {
+                showAlert({
+                  title: '心愿手账归档',
+                  message: '您的所有历史兑换手账记录均已妥善归档与云端加密保存！',
+                  type: 'info',
+                  confirmText: '太棒了'
+                });
+              }}
               className="text-primary hover:underline font-bold flex items-center gap-0.5"
             >
               <span>查看完整手账</span>
