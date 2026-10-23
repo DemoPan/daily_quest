@@ -14,6 +14,7 @@ import {
   AlertCircle,
   AlertTriangle,
   Calendar,
+  Bot,
   X 
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -29,6 +30,7 @@ export default function DailyQuestPage({
   onUpdateTaskRequirement,
   onOpenTimerForTask,
   onOpenPrint,
+  onOpenQuickInput,
   isParentMode
 }) {
   const [filterType, setFilterType] = useState('all'); // all, home, school, pending, unverified
@@ -203,7 +205,22 @@ export default function DailyQuestPage({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-3 w-full sm:w-auto">
+        <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+          <button
+            onClick={() => {
+              sounds.playClick();
+              if (onOpenQuickInput) onOpenQuickInput();
+            }}
+            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-primary text-white font-headline font-bold text-sm shadow-neo-primary btn-squishy"
+            title="微信群作业智能速录与语义拆分"
+          >
+            <Bot className="w-4 h-4 text-amber-300" />
+            <span>智能速录舱</span>
+            <span className="bg-amber-400 text-amber-950 text-[10px] font-black px-1.5 py-0.2 rounded-full">
+              AI
+            </span>
+          </button>
+
           <button
             onClick={() => handleOpenAddModal()}
             className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 btn-squishy-primary text-sm font-headline"

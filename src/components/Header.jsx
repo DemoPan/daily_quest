@@ -13,6 +13,7 @@ import {
   Map, 
   Award,
   BarChart3,
+  Bot,
   Cloud,
   CloudOff,
   RefreshCw
@@ -37,6 +38,7 @@ export default function Header({
 
   const tabs = [
     { id: 'daily', name: '每日闯关', icon: CheckCircle2 },
+    { id: 'quick', name: '智能速录', icon: Bot, isAi: true },
     { id: 'stats', name: '作业统计', icon: BarChart3 },
     { id: 'shop', name: '宝藏兑换屋', icon: Award },
     { id: 'map', name: '知识寻宝地图', icon: Map },
@@ -241,6 +243,11 @@ export default function Header({
             >
               <Icon className={`w-4 h-4 ${isActive ? 'text-primary' : 'text-slate-400'}`} />
               <span>{tab.name}</span>
+              {tab.isAi && (
+                <span className="bg-amber-400 text-amber-950 text-[10px] font-black px-1.5 py-0.2 rounded-full">
+                  AI
+                </span>
+              )}
             </button>
           );
         })}

@@ -5,6 +5,7 @@ import TreasureShopPage from './components/TreasureShop/TreasureShopPage';
 import KnowledgeMapPage from './components/KnowledgeMap/KnowledgeMapPage';
 import ParentBenchPage from './components/ParentBench/ParentBenchPage';
 import StatsContainer from './components/Stats/StatsContainer';
+import QuickHomeworkPage from './components/QuickInput/QuickHomeworkPage';
 import FocusTimerModal from './components/FocusTimer/FocusTimerModal';
 import PrintModal from './components/Print/PrintModal';
 import { initialChildrenData } from './data/defaultData';
@@ -407,6 +408,49 @@ export default function App() {
     });
   };
 
+  // 智能作业速录舱：一键分发并自动归位到各关卡
+  const handleConfirmDispatchQuickTasks = (extractedItems) => {
+    updateCurrentChild((child) => {
+      const newSubjects = child.subjects.map((subj) => {
+        const matchingItems = extractedItems.filter((item) => {
+          if (subj.id === 'chinese' && item.subject === 'chinese') return true;
+          if (subj.id === 'math' && item.subject.startsWith('math')) return true;
+          if (subj.id === 'english' && item.subject === 'english') return true;
+          if (subj.id === 'general' && item.subject === 'general') return true;
+          if (subj.id === 'extra' && item.subject === 'extra') return true;
+          return false;
+        });
+
+        if (matchingItems.length === 0) return subj;
+
+        const newTasksToAdd = matchingItems.map((item, idx) => ({
+          id: `task_ai_${Date.now()}_${idx}`,
+          title: item.title,
+          type: item.scenario || 'home',
+          requirement: item.originalText || item.title,
+          estimatedMinutes: item.estimatedMinutes || 15,
+          completed: item.isSchoolCompleted || false,
+          verified: false,
+          verifiedTime: null,
+          xp: item.xp || 15,
+          coins: Math.max(3, Math.round((item.estimatedMinutes || 15) / 3))
+        }));
+
+        return {
+          ...subj,
+          tasks: [...subj.tasks, ...newTasksToAdd]
+        };
+      });
+
+      return {
+        ...child,
+        subjects: newSubjects
+      };
+    });
+
+    setActiveTab('daily');
+  };
+
   return (
     <div className="min-h-screen bg-brandBg text-onSurface flex flex-col font-body selection:bg-secondary-fixed selection:text-secondary-dark">
       {/* Global Navigation Header */}
@@ -450,7 +494,17 @@ export default function App() {
               setPrintDocType('daily');
               setIsPrintOpen(true);
             }}
+            onOpenQuickInput={() => setActiveTab('quick')}
             isParentMode={isParentMode}
+          />
+        )}
+
+        {activeTab === 'quick' && (
+          <QuickHomeworkPage
+            currentChild={currentChild}
+            onSwitchChild={setCurrentChildId}
+            onBack={() => setActiveTab('daily')}
+            onConfirmDispatch={handleConfirmDispatchQuickTasks}
           />
         )}
 
