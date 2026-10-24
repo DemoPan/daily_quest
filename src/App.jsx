@@ -109,10 +109,41 @@ export default function App() {
         setCloudSyncStatus('syncing');
         const remoteData = await api.getChildren();
         if (isMounted && remoteData && Object.keys(remoteData).length > 0) {
-          const sanitized = sanitizeDailyData(remoteData);
+          const todayKey = getTodayDateKey();
+
+          // 读取当前本地可能已保存的最新编辑数据
+          let localData = null;
+          try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) localData = JSON.parse(saved);
+          } catch (e) {}
+
+          // 核心保护机制：如果用户今天在本地修改过作业（带今日日期），而云端尚未更新今日日期或数据较旧，
+          // 绝不能盲目用云端覆盖本地今日修改！优先保留本地今日作业内容并同步回云端。
+          const mergedData = { ...remoteData };
+          let needPushToCloud = false;
+
+          for (const childId of ['dabao', 'erbao']) {
+            const localChild = localData?.[childId];
+            const remoteChild = remoteData[childId];
+
+            if (localChild && localChild.lastActiveDate === todayKey) {
+              if (!remoteChild || remoteChild.lastActiveDate !== todayKey) {
+                mergedData[childId] = localChild;
+                needPushToCloud = true;
+              }
+            }
+          }
+
+          const sanitized = sanitizeDailyData(mergedData);
           setChildrenData(sanitized);
           setCloudSyncStatus('synced');
           localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitized));
+
+          // 若本地包含更新的今日编辑内容，立刻同步至云端补齐
+          if (needPushToCloud) {
+            api.syncAll(sanitized).catch(() => {});
+          }
         } else if (isMounted) {
           setCloudSyncStatus('synced');
         }
@@ -155,7 +186,25 @@ export default function App() {
       setCloudSyncStatus('syncing');
       const remoteData = await api.getChildren();
       if (remoteData && Object.keys(remoteData).length > 0) {
-        const sanitized = sanitizeDailyData(remoteData);
+        const todayKey = getTodayDateKey();
+        let localData = null;
+        try {
+          const saved = localStorage.getItem(STORAGE_KEY);
+          if (saved) localData = JSON.parse(saved);
+        } catch (e) {}
+
+        const mergedData = { ...remoteData };
+        for (const childId of ['dabao', 'erbao']) {
+          const localChild = localData?.[childId];
+          const remoteChild = remoteData[childId];
+          if (localChild && localChild.lastActiveDate === todayKey) {
+            if (!remoteChild || remoteChild.lastActiveDate !== todayKey) {
+              mergedData[childId] = localChild;
+            }
+          }
+        }
+
+        const sanitized = sanitizeDailyData(mergedData);
         setChildrenData(sanitized);
         setCloudSyncStatus('synced');
         sounds.playSuccess();
@@ -168,14 +217,17 @@ export default function App() {
 
   const currentChild = childrenData[currentChildId] || childrenData.dabao;
 
-  // Helper to update current child's state
+  // Helper to update current child's state (确保任何内容改动都打上今日标准日期戳)
   const updateCurrentChild = (updater) => {
     setChildrenData((prev) => {
       const child = prev[currentChildId];
       const updatedChild = updater({ ...child });
       return {
         ...prev,
-        [currentChildId]: updatedChild
+        [currentChildId]: {
+          ...updatedChild,
+          lastActiveDate: getTodayDateKey()
+        }
       };
     });
   };
