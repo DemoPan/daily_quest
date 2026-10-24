@@ -8,7 +8,7 @@ export default defineConfig({
     port: 3000,
     open: true,
     watch: {
-      ignored: ['**/dist/**', '**/.git/**', '**/daily_quest_server/**']
+      ignored: ['**/dist/**', '**/.git/**', '**/daily_quest_server/**', '**/*.log']
     },
     proxy: {
       '/api': {

@@ -3,9 +3,18 @@
 @tailwind utilities;
 
 @layer base {
-  html, body {
-    background-color: #f8f9ff;
+  html, body, #root {
+    background-color: #f8f9ff !important;
     min-height: 100vh;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* 彻底消除 macOS Chrome/Safari 在图层重绘与 backdrop-filter 切换时导致的灰色闪烁 */
+  header, .sticky, [class*="backdrop-blur"], canvas {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
   }
 }
 
