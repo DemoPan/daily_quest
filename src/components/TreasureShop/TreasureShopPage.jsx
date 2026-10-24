@@ -42,16 +42,16 @@ export default function TreasureShopPage({
   ];
 
   // Filter & Sort
-  const filteredRewards = currentChild.rewards.filter(r => {
+  const filteredRewards = (currentChild?.rewards || []).filter(r => {
     if (selectedCategory === 'all') return true;
     return r.category === selectedCategory;
   }).sort((a, b) => {
     return sortOrder === 'asc' ? a.cost - b.cost : b.cost - a.cost;
   });
 
-  const bigGoal = currentChild.bigGoal;
-  const bigGoalPercent = Math.min(100, Math.round((currentChild.coins / bigGoal.targetCoins) * 100));
-  const bigGoalRemaining = Math.max(0, bigGoal.targetCoins - currentChild.coins);
+  const bigGoal = currentChild?.bigGoal || { targetCoins: 300, currentCoins: 0, title: '' };
+  const bigGoalPercent = Math.min(100, Math.round(((currentChild?.coins || 0) / (bigGoal.targetCoins || 1)) * 100));
+  const bigGoalRemaining = Math.max(0, (bigGoal.targetCoins || 0) - (currentChild?.coins || 0));
   const estimatedDays = Math.ceil(bigGoalRemaining / 20) || 1;
 
   const handleRedeem = async (reward) => {

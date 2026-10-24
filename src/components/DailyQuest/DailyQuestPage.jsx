@@ -45,7 +45,7 @@ export default function DailyQuestPage({
 
   // New task form state
   const [newTaskTitle, setNewTaskTitle] = useState('');
-  const [newTaskSubject, setNewTaskSubject] = useState(currentChild.subjects[0]?.id || '');
+  const [newTaskSubject, setNewTaskSubject] = useState(currentChild?.subjects?.[0]?.id || '');
   const [newTaskType, setNewTaskType] = useState('home');
   const [newTaskRequirement, setNewTaskRequirement] = useState('');
   const [newTaskMinutes, setNewTaskMinutes] = useState(15);
@@ -57,8 +57,9 @@ export default function DailyQuestPage({
   let totalHome = 0;
   let totalSchool = 0;
 
-  currentChild.subjects.forEach(subject => {
-    subject.tasks.forEach(task => {
+  const subjectsList = currentChild?.subjects || [];
+  subjectsList.forEach(subject => {
+    (subject?.tasks || []).forEach(task => {
       totalTasks++;
       if (task.completed) completedTasks++;
       if (task.verified) verifiedTasks++;
@@ -80,7 +81,7 @@ export default function DailyQuestPage({
     if (subjectId) {
       setNewTaskSubject(subjectId);
     } else {
-      setNewTaskSubject(currentChild.subjects[0]?.id || '');
+      setNewTaskSubject(currentChild?.subjects?.[0]?.id || '');
     }
     setNewTaskTitle('');
     setNewTaskRequirement('');
@@ -269,7 +270,7 @@ export default function DailyQuestPage({
 
       {/* Subject Quest Cards Waterfall */}
       <div className="space-y-6">
-        {currentChild.subjects.map((subject) => {
+        {(currentChild?.subjects || []).map((subject) => {
           // Filter tasks based on selected filter
           const filteredTasks = subject.tasks.filter((task) => {
             if (filterType === 'all') return true;
@@ -630,15 +631,17 @@ export default function DailyQuestPage({
       )}
 
       {/* Delete Task Secondary Confirmation Modal from Stitch */}
-      <DeleteHomeworkModal
-        isOpen={Boolean(taskToDelete)}
-        item={taskToDelete}
-        onClose={() => setTaskToDelete(null)}
-        onConfirm={(targetItem) => {
-          onDeleteTask(targetItem.subjectId, targetItem.task.id);
-          setTaskToDelete(null);
-        }}
-      />
+      {Boolean(taskToDelete) && (
+        <DeleteHomeworkModal
+          isOpen={Boolean(taskToDelete)}
+          item={taskToDelete}
+          onClose={() => setTaskToDelete(null)}
+          onConfirm={(targetItem) => {
+            onDeleteTask(targetItem.subjectId, targetItem.task.id);
+            setTaskToDelete(null);
+          }}
+        />
+      )}
     </div>
   );
 }

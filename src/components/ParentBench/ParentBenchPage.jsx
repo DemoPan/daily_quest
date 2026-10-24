@@ -33,8 +33,8 @@ export default function ParentBenchPage({
 
   // Collect pending tasks (completed by child but not yet stamped)
   const pendingVerificationTasks = [];
-  currentChild.subjects.forEach(subject => {
-    subject.tasks.forEach(task => {
+  (currentChild?.subjects || []).forEach(subject => {
+    (subject?.tasks || []).forEach(task => {
       if (task.completed && !task.verified) {
         pendingVerificationTasks.push({ subjectId: subject.id, subjectName: subject.name, ...task });
       }

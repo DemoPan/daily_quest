@@ -9,17 +9,18 @@ export default function PrintModal({
   currentChild,
   initialDocType = 'daily' // 'daily' or 'weekly'
 }) {
-  if (!isOpen) return null;
-
   const [docType, setDocType] = useState(initialDocType);
 
   // Sync initialDocType when opened
   useEffect(() => {
-    setDocType(initialDocType);
-  }, [initialDocType]);
+    if (isOpen) {
+      setDocType(initialDocType);
+    }
+  }, [isOpen, initialDocType]);
 
   // Support ESC key to close modal
   useEffect(() => {
+    if (!isOpen) return;
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
         sounds.playClick();
@@ -28,7 +29,9 @@ export default function PrintModal({
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
 
   const handlePrint = () => {
     sounds.playStamp();

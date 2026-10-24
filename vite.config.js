@@ -7,6 +7,9 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true,
+    watch: {
+      ignored: ['**/dist/**', '**/.git/**', '**/daily_quest_server/**']
+    },
     proxy: {
       '/api': {
         target: 'http://localhost:5001',

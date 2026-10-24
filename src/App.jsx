@@ -688,21 +688,25 @@ export default function App() {
       </main>
 
       {/* Focus Timer Modal */}
-      <FocusTimerModal
-        isOpen={isTimerOpen}
-        onClose={() => setIsTimerOpen(false)}
-        initialTaskTitle={timerTaskTitle}
-        initialMinutes={timerMinutes}
-        onCompleteFocus={handleCompleteFocus}
-      />
+      {isTimerOpen && (
+        <FocusTimerModal
+          isOpen={isTimerOpen}
+          onClose={() => setIsTimerOpen(false)}
+          initialTaskTitle={timerTaskTitle}
+          initialMinutes={timerMinutes}
+          onCompleteFocus={handleCompleteFocus}
+        />
+      )}
 
       {/* A4 Print Modal */}
-      <PrintModal
-        isOpen={isPrintOpen}
-        onClose={() => setIsPrintOpen(false)}
-        currentChild={currentChild}
-        initialDocType={printDocType}
-      />
+      {isPrintOpen && (
+        <PrintModal
+          isOpen={isPrintOpen}
+          onClose={() => setIsPrintOpen(false)}
+          currentChild={currentChild}
+          initialDocType={printDocType}
+        />
+      )}
 
       {/* Footer */}
       <footer className="border-t border-slate-200/80 bg-surface/80 py-4 text-center text-xs text-slate-500 font-medium no-print">

@@ -25,7 +25,7 @@ export default function KnowledgeMapPage({
 }) {
   const [selectedNode, setSelectedNode] = useState(null);
   const { showAlert } = useDialog();
-  const mapData = currentChild.monopolyMap;
+  const mapData = currentChild?.monopolyMap || { nodes: [] };
 
   const handleNodeClick = (node, index) => {
     sounds.playClick();
@@ -161,7 +161,7 @@ export default function KnowledgeMapPage({
 
         {/* Monopoly Path Nodes Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4 relative pt-2">
-          {mapData.nodes.map((node, index) => {
+          {(mapData?.nodes || []).map((node, index) => {
             const isPassed = node.status === 'passed';
             const isActive = node.status === 'active';
             const isLocked = node.status === 'locked';

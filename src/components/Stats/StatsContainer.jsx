@@ -11,7 +11,7 @@ export default function StatsContainer({
   const [selectedDay, setSelectedDay] = useState(null);
 
   // 获取当前孩子（大宝或二宝）的统计数据
-  const childStats = statsData[currentChild.id] || statsData.dabao;
+  const childStats = statsData[currentChild?.id] || statsData.dabao;
 
   const handleSelectDay = (day) => {
     setSelectedDay(day);
