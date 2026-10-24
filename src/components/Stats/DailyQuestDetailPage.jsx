@@ -282,10 +282,26 @@ export default function DailyQuestDetailPage({
 
                 {/* 孩子完成时刻 */}
                 <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-100">
-                  <span className="font-bold text-emerald-600 flex items-center gap-1">
-                    <CheckCircle className="w-4 h-4" />
-                    <span>孩子搞定打卡时刻: {task.completedTime}</span>
-                  </span>
+                  {task.completed ? (
+                    <span className="font-bold text-emerald-600 flex items-center gap-1">
+                      <CheckCircle className="w-4 h-4" />
+                      <span>孩子搞定打卡时刻: {task.completedTime || '已完成'}</span>
+                    </span>
+                  ) : (
+                    <span className="font-bold text-slate-400 flex items-center gap-1">
+                      <Clock className="w-4 h-4" />
+                      <span>今日进行中 · 待打卡攻克</span>
+                    </span>
+                  )}
+                  {task.verified ? (
+                    <span className="font-bold text-amber-600 text-[11px] bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                      家长已盖章
+                    </span>
+                  ) : (
+                    <span className="text-slate-400 text-[11px]">
+                      待家长核验
+                    </span>
+                  )}
                 </div>
 
                 {/* 家长核验火漆印章卡片 */}
@@ -317,16 +333,28 @@ export default function DailyQuestDetailPage({
           <div className="bg-surface rounded-2xl p-5 border border-slate-200 shadow-neo-sm space-y-4">
             <h3 className="font-headline font-bold text-sm text-onSurface flex items-center justify-between">
               <span>学科用时与攻关效率</span>
-              <span className="text-xs text-slate-400">总 165 分钟</span>
+              <span className="text-xs text-slate-400">总 {dayData.actualMinutes || dayData.estimatedMinutes || 120} 分钟</span>
             </h3>
 
             <div className="space-y-3">
-              {[
-                { name: '语文关卡', minutes: 55, percent: 33, note: '提前 5 分钟 · 朗读流畅', color: 'bg-amber-500' },
-                { name: '数学关卡', minutes: 50, percent: 30, note: '攻克压轴几何题 +5m', color: 'bg-blue-500' },
-                { name: '英语关卡', minutes: 30, percent: 18, note: 'AI 口语评分 98 分', color: 'bg-emerald-500' },
-                { name: '科学拓展', minutes: 30, percent: 18, note: '水培实验拍照存档', color: 'bg-purple-500' }
-              ].map((sub, i) => (
+              {(dayData.subjectsSummary && dayData.subjectsSummary.length > 0 ? dayData.subjectsSummary.map((sub, i) => {
+                const total = dayData.totalTasks || 1;
+                const percent = Math.round((sub.done / total) * 100);
+                const colors = ['bg-amber-500', 'bg-blue-500', 'bg-emerald-500', 'bg-purple-500', 'bg-rose-500'];
+                const mins = Math.max(10, Math.round(((dayData.actualMinutes || 110) * (sub.done || 1)) / (dayData.completedTasks || 1)));
+                return {
+                  name: `${sub.name}关卡`,
+                  minutes: mins,
+                  percent: percent || 25,
+                  note: sub.done === sub.total ? `已全部通关 · 共 ${sub.total} 项` : `攻克进度 ${sub.done}/${sub.total}`,
+                  color: colors[i % colors.length]
+                };
+              }) : [
+                { name: '语文关卡', minutes: 45, percent: 35, note: '朗读流畅，字迹端正', color: 'bg-amber-500' },
+                { name: '数学关卡', minutes: 40, percent: 30, note: '草稿严谨，运算无误', color: 'bg-blue-500' },
+                { name: '英语关卡', minutes: 25, percent: 20, note: '口语表达自然标准', color: 'bg-emerald-500' },
+                { name: '科学拓展', minutes: 20, percent: 15, note: '探究记录完整', color: 'bg-purple-500' }
+              ]).map((sub, i) => (
                 <div key={i} className="space-y-1 text-xs">
                   <div className="flex justify-between font-bold text-slate-700">
                     <span>{sub.name}</span>
@@ -354,13 +382,13 @@ export default function DailyQuestDetailPage({
             <div className="grid grid-cols-2 gap-2 text-xs">
               <div className="bg-blue-50/80 p-3 rounded-xl border border-blue-100 space-y-1">
                 <span className="font-black text-blue-800 block">🎒 课堂校内</span>
-                <span className="text-slate-600 block">5项在校交付</span>
+                <span className="text-slate-600 block">{dayData.schoolCount || 0} 项在校交付</span>
                 <span className="text-slate-600 block">A+ 规范度评分</span>
                 <span className="text-emerald-700 font-bold block pt-1">教师批改无返工</span>
               </div>
               <div className="bg-amber-50/80 p-3 rounded-xl border border-amber-100 space-y-1">
                 <span className="font-black text-amber-800 block">🏠 回家自主</span>
-                <span className="text-slate-600 block">9项自主管理</span>
+                <span className="text-slate-600 block">{dayData.homeCount || 0} 项自主管理</span>
                 <span className="text-slate-600 block">90% 独立思考率</span>
                 <span className="text-emerald-700 font-bold block pt-1">零拖延自发开工</span>
               </div>
