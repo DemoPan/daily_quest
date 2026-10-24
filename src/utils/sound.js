@@ -2,6 +2,7 @@
 class SoundEffects {
   constructor() {
     this.ctx = null;
+    this.activeNodes = new Set();
   }
 
   init() {
@@ -16,6 +17,28 @@ class SoundEffects {
     }
   }
 
+  registerNode(node) {
+    if (!node) return;
+    this.activeNodes.add(node);
+    const cleanup = () => {
+      this.activeNodes.delete(node);
+    };
+    node.onended = cleanup;
+  }
+
+  // 立即停止并断开所有当前正在发声的音频节点，防止音效滞留
+  stopAll() {
+    try {
+      for (const node of this.activeNodes) {
+        try {
+          node.stop();
+          node.disconnect();
+        } catch (e) {}
+      }
+      this.activeNodes.clear();
+    } catch (e) {}
+  }
+
   // Soft click for tactile button
   playClick() {
     try {
@@ -23,6 +46,7 @@ class SoundEffects {
       if (!this.ctx) return;
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
+      this.registerNode(osc);
       osc.type = 'sine';
       osc.frequency.setValueAtTime(440, this.ctx.currentTime);
       osc.frequency.exponentialRampToValueAtTime(180, this.ctx.currentTime + 0.05);
@@ -45,6 +69,7 @@ class SoundEffects {
       const now = this.ctx.currentTime;
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
+      this.registerNode(osc);
       osc.type = 'triangle';
       osc.frequency.setValueAtTime(523.25, now); // C5
       osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
@@ -66,6 +91,7 @@ class SoundEffects {
       const now = this.ctx.currentTime;
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
+      this.registerNode(osc);
       osc.type = 'sine';
       osc.frequency.setValueAtTime(987.77, now); // B5
       osc.frequency.setValueAtTime(1318.51, now + 0.09); // E6
@@ -92,6 +118,7 @@ class SoundEffects {
         data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.2));
       }
       const noise = this.ctx.createBufferSource();
+      this.registerNode(noise);
       noise.buffer = buffer;
       const filter = this.ctx.createBiquadFilter();
       filter.type = 'lowpass';
@@ -118,6 +145,7 @@ class SoundEffects {
         const now = this.ctx.currentTime + idx * 0.12;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
+        this.registerNode(osc);
         osc.type = 'triangle';
         osc.frequency.setValueAtTime(freq, now);
         gain.gain.setValueAtTime(0.2, now);
