@@ -9,12 +9,11 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* 彻底消除 macOS Chrome/Safari 在图层重绘与 backdrop-filter 切换时导致的灰色闪烁 */
-  header, .sticky, [class*="backdrop-blur"], canvas {
+  /* 消除 macOS Chrome/Safari 在图层滚动与重绘时的抖动与灰色闪烁 */
+  header, .sticky {
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 

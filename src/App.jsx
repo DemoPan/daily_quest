@@ -156,7 +156,7 @@ export default function App() {
     return () => { isMounted = false; };
   }, []);
 
-  // 2. 数据变动时：即时保存 LocalStorage + 防抖同步至云端 MongoDB
+  // 2. 数据变动时：即时保存 LocalStorage + 静默防抖同步至云端 MongoDB (避免频繁状态抖动触发整页重绘)
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(childrenData));
@@ -168,14 +168,13 @@ export default function App() {
 
     const timer = setTimeout(async () => {
       try {
-        setCloudSyncStatus('syncing');
         await api.syncAll(childrenData);
-        setCloudSyncStatus('synced');
+        setCloudSyncStatus((prev) => (prev !== 'synced' ? 'synced' : prev));
       } catch (err) {
         console.warn('⚠️ [Cloud] 异步保存至云端失败:', err.message);
-        setCloudSyncStatus('offline');
+        setCloudSyncStatus((prev) => (prev !== 'offline' ? 'offline' : prev));
       }
-    }, 600);
+    }, 800);
 
     return () => clearTimeout(timer);
   }, [childrenData]);
