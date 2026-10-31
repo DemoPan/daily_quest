@@ -11,22 +11,29 @@ import {
   Clock, 
   Check, 
   X, 
-  PlusCircle 
+  PlusCircle,
+  BookOpen
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sounds } from '../../utils/sound';
 import { useDialog } from '../../context/DialogContext';
+import HomeworkTemplateManager from './HomeworkTemplateManager';
 
 export default function ParentBenchPage({
   currentChild,
+  childrenData,
+  onSelectChild,
   onBatchVerifyAll,
   onVerifyTask,
   onApproveWish,
   onRejectWish,
   onGrantBonusCoins,
+  onSaveHomeworkTemplates,
+  onRestoreDefaultTemplates,
   isParentMode
 }) {
   const { showAlert, showConfirm } = useDialog();
+  const [activeBenchTab, setActiveBenchTab] = useState('verify'); // 'verify' | 'templates'
   const [bonusReason, setBonusReason] = useState('主动订正错题，书写极其端正！');
   const [bonusAmount, setBonusAmount] = useState(10);
   const [parentComment, setParentComment] = useState('今天作业专注高效，完全没有催促，特别棒！继续保持！');
@@ -95,8 +102,64 @@ export default function ParentBenchPage({
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
-      {/* Header Banner */}
-      <div className="neo-card p-6 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      {/* 顶部二级导航：晚间核验台 vs 每日作业模板配置 */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200/80 pb-3 gap-3">
+        <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl w-fit">
+          <button
+            type="button"
+            onClick={() => {
+              sounds.playClick();
+              setActiveBenchTab('verify');
+            }}
+            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-headline font-bold flex items-center gap-2 transition-all ${
+              activeBenchTab === 'verify'
+                ? 'bg-white text-slate-800 shadow-sm'
+                : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <ShieldCheck className="w-4 h-4 text-amber-600" />
+            <span>晚间 8:30 极速核验台</span>
+            {pendingVerificationTasks.length > 0 && (
+              <span className="w-5 h-5 rounded-full bg-amber-500 text-white text-[11px] flex items-center justify-center font-bold">
+                {pendingVerificationTasks.length}
+              </span>
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              sounds.playClick();
+              setActiveBenchTab('templates');
+            }}
+            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-headline font-bold flex items-center gap-2 transition-all ${
+              activeBenchTab === 'templates'
+                ? 'bg-white text-blue-700 shadow-sm'
+                : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <BookOpen className="w-4 h-4 text-blue-600" />
+            <span>📝 每日作业模板配置</span>
+          </button>
+        </div>
+
+        <div className="text-xs text-slate-400 font-medium">
+          {activeBenchTab === 'verify' ? '查验打卡 · 盖章颁奖 · 审批心愿' : '定制每日默认作业清单 · 跨天自动生效'}
+        </div>
+      </div>
+
+      {activeBenchTab === 'templates' ? (
+        <HomeworkTemplateManager
+          currentChild={currentChild}
+          childrenData={childrenData}
+          onSelectChild={onSelectChild}
+          onSaveHomeworkTemplates={onSaveHomeworkTemplates}
+          onRestoreDefaultTemplates={onRestoreDefaultTemplates}
+        />
+      ) : (
+        <>
+          {/* Header Banner */}
+          <div className="neo-card p-6 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="space-y-1.5">
           <div className="flex items-center gap-2">
             <span className="bg-white/20 backdrop-blur-md text-white text-xs font-bold px-3 py-0.5 rounded-full border border-white/20">
@@ -405,6 +468,8 @@ export default function ParentBenchPage({
           </div>
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 }

@@ -23,7 +23,7 @@ export const getTodayDateKey = () => {
   return `${year}-${month}-${day}`;
 };
 
-// 每日自动重置与数据清洗：确保每天开始都是崭新的 17 项全科默认作业，打卡与核验全部重置为未完成
+// 每日自动重置与数据清洗：确保每天开始都是崭新的作业模板，打卡与核验全部重置为未完成
 export const sanitizeDailyData = (dataMap) => {
   if (!dataMap || typeof dataMap !== 'object') return initialChildrenData;
   const todayKey = getTodayDateKey();
@@ -34,17 +34,32 @@ export const sanitizeDailyData = (dataMap) => {
     const defaultChild = initialChildrenData[childId] || initialChildrenData.dabao;
     const current = result[childId] ? { ...result[childId] } : { ...defaultChild };
 
+    // 确保每个孩子都有模板 templateSubjects，如无则初始化为系统默认作业
+    let templateSubjects = current.templateSubjects;
+    if (!templateSubjects || !Array.isArray(templateSubjects) || templateSubjects.length === 0) {
+      templateSubjects = (defaultChild.subjects || []).map((sub) => ({
+        ...sub,
+        tasks: (sub.tasks || []).map((task) => ({
+          ...task,
+          completed: false,
+          verified: false,
+          verifiedTime: null
+        }))
+      }));
+      current.templateSubjects = templateSubjects;
+    }
+
     const isNewDay = current.lastActiveDate !== todayKey;
 
     if (isNewDay) {
-      // 跨天或首次加载旧缓存数据：自动重置为今日全新标准作业清单，打卡与核验重置为 false，今日能量归零
+      // 跨天或首次加载旧缓存数据：自动按 templateSubjects 模板重置为今日全新标准作业清单，打卡与核验重置为 false，今日能量归零
       result[childId] = {
         ...current,
         lastActiveDate: todayKey,
         todayEnergyXP: 0,
-        subjects: defaultChild.subjects.map((sub) => ({
+        subjects: templateSubjects.map((sub) => ({
           ...sub,
-          tasks: sub.tasks.map((task) => ({
+          tasks: (sub.tasks || []).map((task) => ({
             ...task,
             completed: false,
             verified: false,
@@ -53,11 +68,11 @@ export const sanitizeDailyData = (dataMap) => {
         }))
       };
     } else {
-      // 同一天：如果科目缺失则补齐默认科目
+      // 同一天：如果科目缺失则按 templateSubjects 补齐
       if (!current.subjects || current.subjects.length === 0) {
-        current.subjects = defaultChild.subjects.map((sub) => ({
+        current.subjects = templateSubjects.map((sub) => ({
           ...sub,
-          tasks: sub.tasks.map((task) => ({
+          tasks: (sub.tasks || []).map((task) => ({
             ...task,
             completed: false,
             verified: false,
@@ -235,13 +250,16 @@ export default function App() {
   const handleResetTodayTasks = () => {
     updateCurrentChild((child) => {
       const defaultChild = initialChildrenData[currentChildId] || initialChildrenData.dabao;
+      const baseTemplates = (child.templateSubjects && child.templateSubjects.length > 0)
+        ? child.templateSubjects
+        : defaultChild.subjects;
       return {
         ...child,
         todayEnergyXP: 0,
         lastActiveDate: getTodayDateKey(),
-        subjects: defaultChild.subjects.map((sub) => ({
+        subjects: baseTemplates.map((sub) => ({
           ...sub,
-          tasks: sub.tasks.map((task) => ({
+          tasks: (sub.tasks || []).map((task) => ({
             ...task,
             completed: false,
             verified: false,
@@ -251,6 +269,71 @@ export default function App() {
       };
     });
     sounds.playSuccess();
+  };
+
+  // 保存每日作业模板（支持按孩子独立保存，可选择是否即时应用到今日）
+  const handleSaveHomeworkTemplates = (childId, newTemplates, applyToToday = false) => {
+    setChildrenData((prev) => {
+      const targetChild = prev[childId] || prev.dabao;
+      const updatedChild = {
+        ...targetChild,
+        templateSubjects: newTemplates
+      };
+
+      if (applyToToday) {
+        // 保留今天已有任务的完成与核验打卡状态
+        const currentTasksMap = new Map();
+        (targetChild.subjects || []).forEach(s => {
+          (s.tasks || []).forEach(t => {
+            currentTasksMap.set(t.id, t);
+          });
+        });
+
+        updatedChild.subjects = newTemplates.map(sub => ({
+          ...sub,
+          tasks: (sub.tasks || []).map(task => {
+            const existing = currentTasksMap.get(task.id);
+            return {
+              ...task,
+              completed: existing ? existing.completed : false,
+              verified: existing ? existing.verified : false,
+              verifiedTime: existing ? existing.verifiedTime : null
+            };
+          })
+        }));
+        updatedChild.lastActiveDate = getTodayDateKey();
+      }
+
+      return {
+        ...prev,
+        [childId]: updatedChild
+      };
+    });
+  };
+
+  // 恢复出厂预设作业模板
+  const handleRestoreDefaultTemplates = (childId) => {
+    const defaultChild = initialChildrenData[childId] || initialChildrenData.dabao;
+    const cleanDefaults = defaultChild.subjects.map(sub => ({
+      ...sub,
+      tasks: sub.tasks.map(task => ({
+        ...task,
+        completed: false,
+        verified: false,
+        verifiedTime: null
+      }))
+    }));
+
+    setChildrenData((prev) => {
+      const targetChild = prev[childId] || prev.dabao;
+      return {
+        ...prev,
+        [childId]: {
+          ...targetChild,
+          templateSubjects: cleanDefaults
+        }
+      };
+    });
   };
 
   // Task Completion Toggle (Child action)
@@ -676,11 +759,15 @@ export default function App() {
         {activeTab === 'parent' && (
           <ParentBenchPage
             currentChild={currentChild}
+            childrenData={childrenData}
+            onSelectChild={setCurrentChildId}
             onBatchVerifyAll={handleBatchVerifyAll}
             onVerifyTask={handleVerifyTask}
             onApproveWish={handleApproveWish}
             onRejectWish={handleRejectWish}
             onGrantBonusCoins={handleGrantBonusCoins}
+            onSaveHomeworkTemplates={handleSaveHomeworkTemplates}
+            onRestoreDefaultTemplates={handleRestoreDefaultTemplates}
             isParentMode={isParentMode}
           />
         )}
