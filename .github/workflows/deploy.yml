@@ -35,7 +35,7 @@ jobs:
 
       - name: Build project
         env:
-          VITE_API_BASE: ${{ vars.VITE_API_BASE || '' }}
+          VITE_API_BASE: ${{ vars.VITE_API_BASE || 'https://daily-quest-server.onrender.com' }}
         run: npm run build
 
       - name: Setup GitHub Pages
