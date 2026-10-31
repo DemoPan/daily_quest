@@ -214,7 +214,7 @@ export default function QuickHomeworkPage({
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6 pb-28 animate-in fade-in duration-200">
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-5 sm:space-y-6 pb-40 sm:pb-28 animate-in fade-in duration-200">
       {/* 浮动提示 Toast */}
       {showToast && (
         <div className="fixed top-20 right-6 z-50 bg-slate-900/90 backdrop-blur-md text-white text-xs font-bold px-4 py-2.5 rounded-2xl shadow-2xl border border-slate-700/80 flex items-center gap-2 animate-in slide-in-from-top-2">
@@ -687,7 +687,7 @@ export default function QuickHomeworkPage({
       </div>
 
       {/* 5. 底部结算吸附栏 (Sticky Bottom Action Dock) */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] p-3 sm:p-4 no-print">
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] p-3 sm:p-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] no-print">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           {/* 左侧结算摘要 */}
           <div className="flex items-center gap-3">

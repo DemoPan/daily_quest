@@ -140,8 +140,8 @@ export default function DailyQuestPage({
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
       {/* Top Banner & Quick Controls */}
-      <div className="neo-card p-5 sm:p-6 bg-gradient-to-r from-blue-50/70 via-indigo-50/40 to-amber-50/60 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div>
+      <div className="neo-card p-4 sm:p-6 bg-gradient-to-r from-blue-50/70 via-indigo-50/40 to-amber-50/60 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="w-full md:w-auto">
           {/* 今日真实日期徽章 */}
           <div className="flex flex-wrap items-center gap-2 mb-2">
             <span className="text-xs font-bold text-primary bg-primary-light border border-primary/20 px-3 py-1 rounded-full flex items-center gap-1.5 shadow-sm">
@@ -150,26 +150,26 @@ export default function DailyQuestPage({
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
-            <h1 className="font-headline font-bold text-2xl sm:text-3xl text-onSurface tracking-tight">
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="font-headline font-bold text-xl sm:text-2xl md:text-3xl text-onSurface tracking-tight">
               每日作业动态闯关打卡表
             </h1>
             <span className="bg-amber-100 text-amber-900 border border-amber-300 text-xs font-bold px-2.5 py-1 rounded-full">
               {completedTasks}/{totalTasks} 关搞定 ({completionPercentage}%)
             </span>
           </div>
-          <p className="text-sm text-onSurface-variant mt-1">
+          <p className="text-xs sm:text-sm text-onSurface-variant mt-1">
             双重核验机制 · 孩子自主按时搞定，晚间 8:30 家长火漆盖印验收与掉落金币！
           </p>
 
           {/* Quick Tag Filter */}
-          <div className="flex flex-wrap items-center gap-2 mt-4">
-            <span className="text-xs font-bold text-slate-500 flex items-center gap-1">
-              <Filter className="w-3.5 h-3.5" /> 筛选关卡:
+          <div className="flex items-center gap-1.5 sm:gap-2 mt-3 sm:mt-4 overflow-x-auto no-scrollbar pb-1">
+            <span className="text-xs font-bold text-slate-500 flex items-center gap-1 shrink-0">
+              <Filter className="w-3.5 h-3.5" /> 筛选:
             </span>
             <button
               onClick={() => { sounds.playClick(); setFilterType('all'); }}
-              className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
+              className={`px-2.5 sm:px-3 py-1 rounded-full text-xs font-bold transition-all shrink-0 ${
                 filterType === 'all' 
                   ? 'bg-primary text-white shadow-sm' 
                   : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
@@ -179,27 +179,27 @@ export default function DailyQuestPage({
             </button>
             <button
               onClick={() => { sounds.playClick(); setFilterType('home'); }}
-              className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
+              className={`px-2.5 sm:px-3 py-1 rounded-full text-xs font-bold transition-all shrink-0 ${
                 filterType === 'home' 
                   ? 'bg-amber-500 text-white shadow-sm' 
                   : 'bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200'
               }`}
             >
-              🏠 回家作业 ({totalHome})
+              🏠 回家 ({totalHome})
             </button>
             <button
               onClick={() => { sounds.playClick(); setFilterType('school'); }}
-              className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
+              className={`px-2.5 sm:px-3 py-1 rounded-full text-xs font-bold transition-all shrink-0 ${
                 filterType === 'school' 
                   ? 'bg-blue-600 text-white shadow-sm' 
                   : 'bg-blue-50 text-blue-800 hover:bg-blue-100 border border-blue-200'
               }`}
             >
-              🎒 课堂作业 ({totalSchool})
+              🎒 课堂 ({totalSchool})
             </button>
             <button
               onClick={() => { sounds.playClick(); setFilterType('pending'); }}
-              className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
+              className={`px-2.5 sm:px-3 py-1 rounded-full text-xs font-bold transition-all shrink-0 ${
                 filterType === 'pending' 
                   ? 'bg-emerald-600 text-white shadow-sm' 
                   : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200'
@@ -210,26 +210,26 @@ export default function DailyQuestPage({
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+        {/* Action Buttons: 移动端自适应 2x2 网格，桌面端行排列 */}
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
           <button
             onClick={() => {
               sounds.playClick();
               if (onOpenQuickInput) onOpenQuickInput();
             }}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-primary text-white font-headline font-bold text-sm shadow-neo-primary btn-squishy"
+            className="flex items-center justify-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-primary text-white font-headline font-bold text-xs sm:text-sm shadow-neo-primary btn-squishy"
             title="微信群作业智能速录与语义拆分"
           >
             <Bot className="w-4 h-4 text-amber-300" />
             <span>智能速录舱</span>
-            <span className="bg-amber-400 text-amber-950 text-[10px] font-black px-1.5 py-0.2 rounded-full">
+            <span className="bg-amber-400 text-amber-950 text-[10px] font-black px-1 py-0.2 rounded-full">
               AI
             </span>
           </button>
 
           <button
             onClick={() => handleOpenAddModal()}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 btn-squishy-primary text-sm font-headline"
+            className="flex items-center justify-center gap-1.5 px-3 py-2 sm:py-2.5 btn-squishy-primary text-xs sm:text-sm font-headline"
           >
             <Plus className="w-4 h-4" />
             <span>登记新作业</span>
@@ -240,7 +240,7 @@ export default function DailyQuestPage({
               const confirmed = await showConfirm({
                 title: '重置今日作业',
                 message: '确定要重置今日作业吗？',
-                subMessage: '将恢复今日 17 项全科默认作业清单，并将所有打卡和核验印章重置为待完成。',
+                subMessage: '将恢复今日默认作业清单，并将所有打卡和核验印章重置为待完成。',
                 type: 'warning',
                 confirmText: '确认重置',
                 cancelText: '取消',
@@ -250,7 +250,7 @@ export default function DailyQuestPage({
                 onResetTodayTasks();
               }
             }}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-2xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/90 font-headline font-bold text-xs sm:text-sm btn-squishy transition-all"
+            className="flex items-center justify-center gap-1 px-3 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/90 font-headline font-bold text-xs sm:text-sm btn-squishy transition-all"
             title="恢复今日全科默认作业并将状态重置为待完成"
           >
             <RotateCcw className="w-3.5 h-3.5 text-amber-700" />
@@ -259,11 +259,11 @@ export default function DailyQuestPage({
 
           <button
             onClick={() => { sounds.playClick(); onOpenPrint(); }}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 btn-squishy-white text-sm"
+            className="flex items-center justify-center gap-1.5 px-3 py-2 sm:py-2.5 btn-squishy-white text-xs sm:text-sm"
             title="打印今日纸质学习单"
           >
             <Printer className="w-4 h-4 text-slate-700" />
-            <span className="hidden sm:inline">打印今日单</span>
+            <span>打印今日单</span>
           </button>
         </div>
       </div>
@@ -410,18 +410,18 @@ export default function DailyQuestPage({
                         </div>
 
                         {/* Right: Time + Parent Stamp + Delete */}
-                        <div className="flex items-center justify-between lg:justify-end gap-2.5 pl-11 lg:pl-0 shrink-0">
+                        <div className="flex items-center justify-between lg:justify-end gap-1.5 sm:gap-2.5 pl-10 sm:pl-11 lg:pl-0 shrink-0">
                           {/* Time estimation (clickable to start Pomodoro) */}
                           <button
                             onClick={() => {
                               sounds.playClick();
                               onOpenTimerForTask(task.title, task.estimatedMinutes);
                             }}
-                            className="flex items-center gap-1 text-xs text-slate-600 hover:text-primary font-medium px-2 py-1 rounded-lg hover:bg-blue-50/80 transition-colors"
+                            className="flex items-center gap-1 text-[11px] sm:text-xs text-slate-600 hover:text-primary font-medium px-1.5 sm:px-2 py-1 rounded-lg hover:bg-blue-50/80 transition-colors shrink-0"
                             title="点击开启专注计时"
                           >
                             <Clock className="w-3.5 h-3.5 text-primary" />
-                            <span>⏱️ {task.estimatedMinutes}分钟</span>
+                            <span>{task.estimatedMinutes}m</span>
                           </button>
 
                           {/* Parent Stamp Button */}
@@ -434,16 +434,17 @@ export default function DailyQuestPage({
                                   sounds.playStamp();
                                 }
                               }}
-                              className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 font-headline font-bold text-xs shadow-sm flex items-center gap-1.5 animate-stamp cursor-pointer border border-amber-300"
+                              className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 font-headline font-bold text-xs shadow-sm flex items-center gap-1 animate-stamp cursor-pointer border border-amber-300"
                               title={isParentMode ? '家长点击可撤销盖印' : '家长已于此时间核验通过'}
                             >
                               <span>⭐</span>
-                              <span>家长已核验 ✓ {task.verifiedTime || '已盖印'}</span>
+                              <span className="hidden sm:inline">家长已核验 ✓ {task.verifiedTime || '已盖印'}</span>
+                              <span className="sm:hidden">已核验 ✓ {task.verifiedTime || ''}</span>
                             </button>
                           ) : (
                             <button
                               onClick={() => handleStamp(subject.id, task.id, false)}
-                              className={`px-3 py-1.5 rounded-xl border-2 border-dashed text-xs font-bold transition-all flex items-center gap-1.5 btn-squishy ${
+                              className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl border-2 border-dashed text-xs font-bold transition-all flex items-center gap-1 btn-squishy ${
                                 isParentMode || task.completed
                                   ? 'border-amber-400 bg-amber-50/80 text-amber-900 hover:bg-amber-100 hover:border-amber-500 shadow-sm'
                                   : 'border-slate-300 text-slate-400 hover:border-slate-400 hover:text-slate-600 bg-white'
@@ -451,7 +452,8 @@ export default function DailyQuestPage({
                               title={task.completed ? '孩子已搞定，点击盖上家长核验印章' : '完成任务后进行家长签印'}
                             >
                               <Stamp className="w-3.5 h-3.5" />
-                              <span>[家长签印]</span>
+                              <span className="hidden sm:inline">[家长签印]</span>
+                              <span className="sm:hidden">签印</span>
                             </button>
                           )}
 
@@ -465,7 +467,7 @@ export default function DailyQuestPage({
                                 task
                               });
                             }}
-                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors shrink-0"
                             title="删除今日不需要的作业条目"
                           >
                             <Trash2 className="w-4 h-4" />

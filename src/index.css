@@ -15,6 +15,26 @@
     backface-visibility: hidden;
     transform: translate3d(0, 0, 0);
   }
+
+  /* 移动端优化：防止 iOS Safari 在点击 input 时自动局部放大画面破坏排版 */
+  @media screen and (max-width: 768px) {
+    input[type="text"],
+    input[type="number"],
+    input[type="password"],
+    select,
+    textarea {
+      font-size: 16px !important;
+    }
+  }
+}
+
+/* 隐藏横向滚动条但保持平滑触控滑动 */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 @layer components {

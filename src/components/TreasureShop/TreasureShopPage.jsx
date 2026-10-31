@@ -145,56 +145,56 @@ export default function TreasureShopPage({
         </div>
 
         {/* Top-Right 3 Asset Metric Cards */}
-        <div className="grid grid-cols-3 gap-3 w-full lg:w-auto">
+        <div className="grid grid-cols-3 gap-2 sm:gap-3 w-full lg:w-auto">
           {/* Available Coins */}
-          <div className="neo-card p-3 sm:p-4 bg-amber-50/90 border-amber-200/90 text-center flex flex-col items-center justify-center min-w-[100px]">
-            <div className="flex items-center gap-1 text-amber-900 font-headline font-bold text-xl sm:text-2xl">
+          <div className="neo-card p-2.5 sm:p-4 bg-amber-50/90 border-amber-200/90 text-center flex flex-col items-center justify-center min-w-[80px] sm:min-w-[100px]">
+            <div className="flex items-center gap-1 text-amber-900 font-headline font-bold text-lg sm:text-2xl">
               <span>🪙</span>
               <span>{currentChild.coins}</span>
             </div>
-            <div className="text-[11px] font-bold text-amber-800/80 mt-0.5">当前可用金币</div>
+            <div className="text-[10px] sm:text-[11px] font-bold text-amber-800/80 mt-0.5">可用金币</div>
           </div>
 
           {/* Total Earned Coins */}
-          <div className="neo-card p-3 sm:p-4 bg-blue-50/90 border-blue-200/90 text-center flex flex-col items-center justify-center min-w-[100px]">
-            <div className="flex items-center gap-1 text-blue-900 font-headline font-bold text-xl sm:text-2xl">
+          <div className="neo-card p-2.5 sm:p-4 bg-blue-50/90 border-blue-200/90 text-center flex flex-col items-center justify-center min-w-[80px] sm:min-w-[100px]">
+            <div className="flex items-center gap-1 text-blue-900 font-headline font-bold text-lg sm:text-2xl">
               <span>🏆</span>
               <span>{currentChild.totalCoins}</span>
             </div>
-            <div className="text-[11px] font-bold text-blue-800/80 mt-0.5">累计赚取金币</div>
+            <div className="text-[10px] sm:text-[11px] font-bold text-blue-800/80 mt-0.5">累计赚取</div>
           </div>
 
           {/* Wish Completion Rate */}
-          <div className="neo-card p-3 sm:p-4 bg-emerald-50/90 border-emerald-200/90 text-center flex flex-col items-center justify-center min-w-[100px]">
-            <div className="flex items-center gap-1 text-emerald-900 font-headline font-bold text-xl sm:text-2xl">
+          <div className="neo-card p-2.5 sm:p-4 bg-emerald-50/90 border-emerald-200/90 text-center flex flex-col items-center justify-center min-w-[80px] sm:min-w-[100px]">
+            <div className="flex items-center gap-1 text-emerald-900 font-headline font-bold text-lg sm:text-2xl">
               <span>🌱</span>
               <span>75%</span>
             </div>
-            <div className="text-[11px] font-bold text-emerald-800/80 mt-0.5">心愿达成率</div>
+            <div className="text-[10px] sm:text-[11px] font-bold text-emerald-800/80 mt-0.5">心愿达成率</div>
           </div>
         </div>
       </div>
 
       {/* Super Big Goal Card (终极大愿望契约) */}
-      <div className="neo-card p-6 bg-gradient-to-r from-orange-100/40 via-amber-50/50 to-white border-amber-300/80 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
-        <div className="flex items-center gap-5 flex-1">
-          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-4xl sm:text-5xl shadow-neo-secondary shrink-0">
+      <div className="neo-card p-4 sm:p-6 bg-gradient-to-r from-orange-100/40 via-amber-50/50 to-white border-amber-300/80 flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6 relative overflow-hidden">
+        <div className="flex items-center gap-3 sm:gap-5 flex-1 w-full md:w-auto">
+          <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-3xl sm:text-5xl shadow-neo-secondary shrink-0">
             {bigGoal.image || '🏰'}
           </div>
 
-          <div className="space-y-1.5 flex-1">
+          <div className="space-y-1.5 flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <span className="bg-amber-500 text-white font-headline font-bold text-xs px-2.5 py-0.5 rounded-full shadow-sm">
                 终极大愿望
               </span>
-              <span className="text-xs text-primary font-bold bg-blue-100/80 px-2 py-0.5 rounded-md">
-                正在积金币 目标周期：{bigGoal.period}
+              <span className="text-xs text-primary font-bold bg-blue-100/80 px-2 py-0.5 rounded-md truncate">
+                目标周期：{bigGoal.period}
               </span>
             </div>
-            <h2 className="font-headline font-bold text-xl sm:text-2xl text-onSurface">
+            <h2 className="font-headline font-bold text-lg sm:text-2xl text-onSurface truncate">
               {bigGoal.title}
             </h2>
-            <p className="text-xs sm:text-sm text-slate-600 flex items-center gap-1 font-medium">
+            <p className="text-xs sm:text-sm text-slate-600 flex items-center gap-1 font-medium line-clamp-1">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
               <span>{bigGoal.note}</span>
             </p>
@@ -202,13 +202,13 @@ export default function TreasureShopPage({
         </div>
 
         {/* Big Goal Progress Bar & Days needed */}
-        <div className="w-full md:w-80 space-y-2 bg-white/80 p-4 rounded-2xl border border-amber-200/80 shrink-0">
+        <div className="w-full md:w-80 space-y-2 bg-white/80 p-3 sm:p-4 rounded-2xl border border-amber-200/80 shrink-0">
           <div className="flex items-center justify-between text-xs font-bold text-slate-700">
             <span className="flex items-center gap-1">
               <span>🚩</span>
               <span>储蓄进度</span>
             </span>
-            <span className="text-amber-600 font-headline text-sm">
+            <span className="text-amber-600 font-headline text-xs sm:text-sm">
               {currentChild.coins} / {bigGoal.targetCoins} 🪙 ({bigGoalPercent}%)
             </span>
           </div>
@@ -220,7 +220,7 @@ export default function TreasureShopPage({
             />
           </div>
 
-          <div className="flex items-center justify-between text-[11px] font-bold">
+          <div className="flex items-center justify-between text-[11px] font-bold flex-wrap gap-1">
             <span className="text-rose-600">
               还差 {bigGoalRemaining} 金币
             </span>
@@ -232,9 +232,9 @@ export default function TreasureShopPage({
       </div>
 
       {/* Category Pills & Sorting Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         {/* Category Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1">
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
           {categories.map((cat) => (
             <button
               key={cat.id}
