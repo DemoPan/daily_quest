@@ -1,4 +1,8 @@
-const API_BASE = '/api';
+// 支持通过环境变量配置线上 Koyeb 后端地址，本地开发默认回退至 '/api' 代理
+const rawBase = import.meta.env.VITE_API_BASE || '';
+const API_BASE = rawBase 
+  ? (rawBase.endsWith('/api') ? rawBase : `${rawBase.replace(/\/$/, '')}/api`) 
+  : '/api';
 
 export const api = {
   // 健康检查
